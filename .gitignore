@@ -1,0 +1,34 @@
+# Backend (Java/Spring Boot)
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+.mvn/
+mvnw
+mvnw.cmd
+
+# Frontend (React/Node)
+node_modules/
+build/
+dist/
+.env
+.env.local
+.env.production
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
