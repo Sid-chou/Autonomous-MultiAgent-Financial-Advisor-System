@@ -1,0 +1,39 @@
+server.port=8080
+spring.application.name=risk-agent
+
+# CORS settings for React frontend
+spring.web.cors.allowed-origins=http://localhost:3000,https://localhost:3000
+spring.web.cors.allowed-methods=GET,POST,PUT,DELETE,OPTIONS
+spring.web.cors.allowed-headers=*
+
+# Groq API Configuration (Primary AI - Ultra Fast)
+# Get your key from: https://console.groq.com/keys
+groq.api.key=YOUR_GROQ_API_KEY_HERE
+groq.api.url=https://api.groq.com/openai/v1/chat/completions
+groq.model.complex=llama-3.3-70b-versatile
+groq.model.simple=llama-3.1-8b-instant
+
+# Gemini API Configuration (Backup AI)
+# Get your key from: https://aistudio.google.com/app/apikey
+gemini.api.key=YOUR_GEMINI_API_KEY_HERE
+gemini.api.url=https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${gemini.api.key}
+
+# Alpha Vantage API Configuration (Market Data)
+# Get your key from: https://www.alphavantage.co/support/#api-key
+alphavantage.api.key=YOUR_ALPHAVANTAGE_API_KEY_HERE
+alphavantage.api.url=https://www.alphavantage.co/query
+
+# Indian Market Configuration
+market.country=INDIA
+market.currency=INR
+market.timezone=Asia/Kolkata
+market.primary-exchange=NSE
+market.indices=NIFTY50,SENSEX,BANKNIFTY
+
+# Agent Scheduling
+agent.market.update.interval=300000
+agent.alert.check.interval=60000
+
+# Cache Configuration
+cache.ai.enabled=true
+cache.ai.ttl=3600

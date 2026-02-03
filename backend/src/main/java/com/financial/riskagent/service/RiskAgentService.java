@@ -3,16 +3,17 @@ package com.financial.riskagent.service;
 import com.financial.riskagent.model.Holding;
 import com.financial.riskagent.model.PortfolioRequest;
 import com.financial.riskagent.model.RiskAnalysisResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 @Service
 public class RiskAgentService {
 
-    private final Random random = new Random();
+    @Autowired
+    private AIRouterService aiRouter;
 
     /**
      * Main method: Analyze portfolio risk
@@ -207,28 +208,29 @@ public class RiskAgentService {
     }
 
     /**
-     * Generate AI-powered insight
-     * In production, this would call Gemini API
+     * Generate AI-powered insight using Groq/Gemini API
+     * Optimized for Indian market context
      */
     private String generateAIInsight(String riskLevel, double totalValue, int numHoldings) {
-        String[] insights = {
-                "Based on current market conditions and your portfolio composition, the " + riskLevel.toLowerCase() +
-                        " risk level suggests a " + (riskLevel.equals("HIGH") ? "cautious" : "balanced")
-                        + " approach to future investments.",
+        String prompt = String.format(
+                "Portfolio Analysis for Indian Investor:\n" +
+                        "- Total Value: ₹%.2f\n" +
+                        "- Risk Level: %s\n" +
+                        "- Number of Holdings: %d\n\n" +
+                        "Provide brief (2-3 sentences) risk assessment insight considering Indian market conditions. " +
+                        "Mention specific actions or sectors relevant to NSE/BSE investors.",
+                totalValue,
+                riskLevel,
+                numHoldings);
 
-                "Your portfolio of $" + String.format("%.2f", totalValue) + " across " + numHoldings +
-                        " holdings shows " + (numHoldings >= 8 ? "good" : "limited") + " diversification potential.",
-
-                "Market volatility indicators suggest " + (riskLevel.equals("LOW") ? "maintaining" : "reviewing") +
-                        " your current allocation strategy. Consider "
-                        + (riskLevel.equals("HIGH") ? "defensive" : "growth") + " sectors.",
-
-                "Risk-adjusted returns could be optimized by "
-                        + (riskLevel.equals("HIGH") ? "reducing exposure to volatile assets"
-                                : "maintaining current strategy")
-                        + "."
-        };
-
-        return insights[random.nextInt(insights.length)];
+        try {
+            return aiRouter.generateInsight(prompt, AIRouterService.InsightComplexity.HIGH);
+        } catch (Exception e) {
+            // Fallback if AI fails
+            return String.format(
+                    "Portfolio worth ₹%.2f shows %s risk level across %d holdings. " +
+                            "Consider reviewing allocation in light of current Indian market conditions.",
+                    totalValue, riskLevel.toLowerCase(), numHoldings);
+        }
     }
 }

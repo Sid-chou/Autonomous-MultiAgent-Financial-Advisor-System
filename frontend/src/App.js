@@ -1,364 +1,222 @@
 import React, { useState } from 'react';
 import {
-    Container,
-    Paper,
-    Typography,
-    TextField,
-    Button,
-    Grid,
-    Card,
-    CardContent,
-    Box,
-    Chip,
-    Alert,
-    CircularProgress,
-    LinearProgress,
-    IconButton,
-    Divider
-} from '@mui/material';
-import {
-    Add as AddIcon,
-    Delete as DeleteIcon,
-    Analytics as AnalyticsIcon,
-    TrendingUp as TrendingUpIcon,
-    Shield as ShieldIcon,
-    Warning as WarningIcon
-} from '@mui/icons-material';
-import axios from 'axios';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+    TrendingUp,
+    Shield,
+    BarChart3,
+    Bell,
+    User,
+    Settings,
+    AlertTriangle,
+    ChevronLeft,
+    ChevronRight
+} from 'lucide-react';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
+// Import panels
+import RiskPanel from './components/RiskPanel';
+import OptimizationPanel from './components/OptimizationPanel';
+import MarketPanel from './components/MarketPanel';
+import AlertsPanel from './components/AlertsPanel';
 
 function App() {
+    const [activeTab, setActiveTab] = useState(0);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [holdings, setHoldings] = useState([
-        { symbol: 'AAPL', quantity: 10, purchasePrice: 150, currentPrice: 175 },
-        { symbol: 'GOOGL', quantity: 5, purchasePrice: 2800, currentPrice: 2950 },
+        { symbol: 'RELIANCE.NS', quantity: 10, purchasePrice: 2400, currentPrice: 2550 },
+        { symbol: 'TCS.NS', quantity: 5, purchasePrice: 3200, currentPrice: 3450 },
+        { symbol: 'INFY.NS', quantity: 8, purchasePrice: 1450, currentPrice: 1520 }
     ]);
     const [riskTolerance, setRiskTolerance] = useState('moderate');
-    const [analysis, setAnalysis] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [alertCount, setAlertCount] = useState(3);
 
-    const addHolding = () => {
-        setHoldings([...holdings, { symbol: '', quantity: 0, purchasePrice: 0, currentPrice: 0 }]);
-    };
+    const tabConfig = [
+        { label: 'Risk Analysis', icon: Shield },
+        { label: 'Optimization', icon: TrendingUp },
+        { label: 'Market', icon: BarChart3 },
+        { label: 'Alerts', icon: AlertTriangle, badge: alertCount }
+    ];
 
-    const removeHolding = (index) => {
-        setHoldings(holdings.filter((_, i) => i !== index));
-    };
-
-    const updateHolding = (index, field, value) => {
-        const updated = [...holdings];
-        updated[index][field] = field === 'symbol' ? value : parseFloat(value) || 0;
-        setHoldings(updated);
-    };
-
-    const analyzeRisk = async () => {
-        setLoading(true);
-        setError(null);
-
-        try {
-            const response = await axios.post('http://localhost:8080/api/risk/analyze', {
-                holdings: holdings,
-                riskTolerance: riskTolerance
-            });
-            setAnalysis(response.data);
-        } catch (err) {
-            setError('Failed to analyze portfolio. Make sure the backend is running on port 8080.');
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const getRiskColor = (level) => {
-        switch (level) {
-            case 'LOW': return '#4caf50';
-            case 'MEDIUM': return '#ff9800';
-            case 'HIGH': return '#f44336';
-            default: return '#9e9e9e';
-        }
-    };
-
-    const pieData = holdings.map(h => ({
-        name: h.symbol,
-        value: h.currentPrice * h.quantity
-    }));
+    const ActiveComponent = [RiskPanel, OptimizationPanel, MarketPanel, AlertsPanel][activeTab];
 
     return (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
-            {/* Header */}
-            <Paper elevation={3} sx={{ p: 3, mb: 3, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
-                <Box display="flex" alignItems="center" gap={2}>
-                    <ShieldIcon sx={{ fontSize: 48 }} />
-                    <Box>
-                        <Typography variant="h3" fontWeight="bold">
-                            Risk Assessment Agent
-                        </Typography>
-                        <Typography variant="h6" sx={{ opacity: 0.9 }}>
-                            Autonomous Multi-Agent Financial Advisor System
-                        </Typography>
-                    </Box>
-                </Box>
-            </Paper>
+        <div className="min-h-screen flex animate-fade-in" style={{ backgroundColor: '#E8ECF4' }}>
+            {/* Sidebar */}
+            <aside
+                className={`fixed left-0 top-0 h-full transition-all duration-300 z-40 ${sidebarCollapsed ? 'w-20' : 'w-64'
+                    }`}
+                style={{ backgroundColor: '#1A1F37' }}
+            >
+                <div className="flex flex-col h-full">
+                    {/* Logo Section */}
+                    <div className="p-6 border-b border-white/10">
+                        <div className="flex items-center gap-3">
+                            <div
+                                className="p-2.5 rounded-xl"
+                                style={{ background: 'linear-gradient(135deg, #4A6CF7 0%, #5E7DFF 100%)' }}
+                            >
+                                <BarChart3 className="w-6 h-6 text-white" />
+                            </div>
+                            {!sidebarCollapsed && (
+                                <div className="animate-slide-right">
+                                    <h1 className="text-white text-lg font-bold tracking-tight">
+                                        FinAdvisor
+                                    </h1>
+                                    <p className="text-gray-400 text-xs">Multi-Agent AI</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
 
-            <Grid container spacing={3}>
-                {/* Left Panel - Portfolio Input */}
-                <Grid item xs={12} md={6}>
-                    <Paper elevation={2} sx={{ p: 3 }}>
-                        <Typography variant="h5" gutterBottom fontWeight="bold" display="flex" alignItems="center" gap={1}>
-                            <TrendingUpIcon /> Portfolio Holdings
-                        </Typography>
+                    {/* Navigation */}
+                    <nav className="flex-1 py-6 px-3">
+                        {tabConfig.map((tab, idx) => {
+                            const Icon = tab.icon;
+                            const isActive = activeTab === idx;
 
-                        {holdings.map((holding, index) => (
-                            <Card key={index} sx={{ mb: 2, bgcolor: '#f5f5f5' }}>
-                                <CardContent>
-                                    <Grid container spacing={2} alignItems="center">
-                                        <Grid item xs={12} sm={3}>
-                                            <TextField
-                                                label="Symbol"
-                                                value={holding.symbol}
-                                                onChange={(e) => updateHolding(index, 'symbol', e.target.value)}
-                                                fullWidth
-                                                size="small"
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} sm={3}>
-                                            <TextField
-                                                label="Quantity"
-                                                type="number"
-                                                value={holding.quantity}
-                                                onChange={(e) => updateHolding(index, 'quantity', e.target.value)}
-                                                fullWidth
-                                                size="small"
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} sm={3}>
-                                            <TextField
-                                                label="Purchase $"
-                                                type="number"
-                                                value={holding.purchasePrice}
-                                                onChange={(e) => updateHolding(index, 'purchasePrice', e.target.value)}
-                                                fullWidth
-                                                size="small"
-                                            />
-                                        </Grid>
-                                        <Grid item xs={10} sm={2}>
-                                            <TextField
-                                                label="Current $"
-                                                type="number"
-                                                value={holding.currentPrice}
-                                                onChange={(e) => updateHolding(index, 'currentPrice', e.target.value)}
-                                                fullWidth
-                                                size="small"
-                                            />
-                                        </Grid>
-                                        <Grid item xs={2} sm={1}>
-                                            <IconButton onClick={() => removeHolding(index)} color="error" size="small">
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </Grid>
-                                    </Grid>
-                                </CardContent>
-                            </Card>
-                        ))}
+                            return (
+                                <button
+                                    key={idx}
+                                    onClick={() => setActiveTab(idx)}
+                                    className={`
+                                        w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2
+                                        transition-all duration-200 relative group
+                                        ${isActive
+                                            ? 'text-white shadow-lg'
+                                            : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                                        }
+                                    `}
+                                    style={isActive ? { backgroundColor: '#4A6CF7' } : {}}
+                                    title={sidebarCollapsed ? tab.label : ''}
+                                >
+                                    <Icon className="w-5 h-5 flex-shrink-0" />
+                                    {!sidebarCollapsed && (
+                                        <>
+                                            <span className="font-medium text-sm flex-1 text-left">
+                                                {tab.label}
+                                            </span>
+                                            {tab.badge > 0 && (
+                                                <span
+                                                    className="px-2 py-0.5 rounded-full text-xs font-bold"
+                                                    style={isActive
+                                                        ? { backgroundColor: 'rgba(255,255,255,0.2)', color: 'white' }
+                                                        : { backgroundColor: '#EF4444', color: 'white' }
+                                                    }
+                                                >
+                                                    {tab.badge}
+                                                </span>
+                                            )}
+                                        </>
+                                    )}
+                                    {sidebarCollapsed && tab.badge > 0 && (
+                                        <span
+                                            className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center rounded-full text-xs font-bold"
+                                            style={{ backgroundColor: '#EF4444', color: 'white' }}
+                                        >
+                                            {tab.badge}
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </nav>
 
-                        <Button
-                            startIcon={<AddIcon />}
-                            onClick={addHolding}
-                            variant="outlined"
-                            fullWidth
-                            sx={{ mb: 2 }}
+                    {/* Collapse Toggle */}
+                    <div className="p-3 border-t border-white/10">
+                        <button
+                            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition-all duration-200"
                         >
-                            Add Holding
-                        </Button>
+                            {sidebarCollapsed ? (
+                                <ChevronRight className="w-5 h-5" />
+                            ) : (
+                                <>
+                                    <ChevronLeft className="w-5 h-5" />
+                                    <span className="text-sm font-medium">Collapse</span>
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </aside>
 
-                        <Divider sx={{ my: 2 }} />
+            {/* Main Content */}
+            <div
+                className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'ml-20' : 'ml-64'
+                    }`}
+            >
+                {/* Header */}
+                <header className="sticky top-0 z-30 bg-white border-b shadow-sm" style={{ borderColor: '#E0E4EC' }}>
+                    <div className="px-6 py-4">
+                        <div className="flex items-center justify-between">
+                            {/* Page Title */}
+                            <div>
+                                <h2 className="font-bold text-xl" style={{ color: '#1A1F37' }}>
+                                    {tabConfig[activeTab].label}
+                                </h2>
+                                <p className="text-sm mt-1" style={{ color: '#6B7280' }}>
+                                    Autonomous Indian Market Analysis • NIFTY 50 • SENSEX • NSE/BSE
+                                </p>
+                            </div>
 
-                        <Typography variant="subtitle1" gutterBottom fontWeight="bold">
-                            Risk Tolerance
-                        </Typography>
-                        <Box display="flex" gap={1} mb={3}>
-                            {['conservative', 'moderate', 'aggressive'].map((level) => (
-                                <Chip
-                                    key={level}
-                                    label={level.charAt(0).toUpperCase() + level.slice(1)}
-                                    onClick={() => setRiskTolerance(level)}
-                                    color={riskTolerance === level ? 'primary' : 'default'}
-                                    variant={riskTolerance === level ? 'filled' : 'outlined'}
-                                />
-                            ))}
-                        </Box>
+                            {/* User Controls */}
+                            <div className="flex items-center gap-3">
+                                {/* Notifications */}
+                                <button
+                                    className="relative p-2.5 rounded-lg transition-all duration-200 hover:shadow-md"
+                                    style={{ backgroundColor: '#F3F4F6', color: '#6B7280' }}
+                                >
+                                    <Bell className="w-5 h-5" />
+                                    {alertCount > 0 && (
+                                        <span
+                                            className="absolute -top-1 -right-1 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
+                                            style={{ backgroundColor: '#EF4444' }}
+                                        >
+                                            {alertCount}
+                                        </span>
+                                    )}
+                                </button>
 
-                        <Button
-                            variant="contained"
-                            size="large"
-                            fullWidth
-                            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <AnalyticsIcon />}
-                            onClick={analyzeRisk}
-                            disabled={loading || holdings.length === 0}
-                            sx={{
-                                py: 1.5,
-                                fontSize: '1.1rem',
-                                background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
-                            }}
-                        >
-                            {loading ? 'Analyzing...' : 'Analyze Risk'}
-                        </Button>
+                                {/* Settings */}
+                                <button
+                                    className="p-2.5 rounded-lg transition-all duration-200 hover:shadow-md"
+                                    style={{ backgroundColor: '#F3F4F6', color: '#6B7280' }}
+                                >
+                                    <Settings className="w-5 h-5" />
+                                </button>
 
-                        {error && (
-                            <Alert severity="error" sx={{ mt: 2 }}>
-                                {error}
-                            </Alert>
-                        )}
-                    </Paper>
-
-                    {/* Portfolio Distribution Chart */}
-                    {holdings.length > 0 && (
-                        <Paper elevation={2} sx={{ p: 3, mt: 3 }}>
-                            <Typography variant="h6" gutterBottom fontWeight="bold">
-                                Portfolio Distribution
-                            </Typography>
-                            <ResponsiveContainer width="100%" height={250}>
-                                <PieChart>
-                                    <Pie
-                                        data={pieData}
-                                        cx="50%"
-                                        cy="50%"
-                                        labelLine={false}
-                                        label={(entry) => entry.name}
-                                        outerRadius={80}
-                                        fill="#8884d8"
-                                        dataKey="value"
+                                {/* User Avatar */}
+                                <button
+                                    className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 hover:shadow-md"
+                                    style={{ backgroundColor: '#F3F4F6' }}
+                                >
+                                    <div
+                                        className="p-2 rounded-full"
+                                        style={{ background: 'linear-gradient(135deg, #4A6CF7 0%, #5E7DFF 100%)' }}
                                     >
-                                        {pieData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip />
-                                    <Legend />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </Paper>
-                    )}
-                </Grid>
+                                        <User className="w-4 h-4 text-white" />
+                                    </div>
+                                    <span className="text-sm font-medium" style={{ color: '#1A1F37' }}>
+                                        Account
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </header>
 
-                {/* Right Panel - Analysis Results */}
-                <Grid item xs={12} md={6}>
-                    {analysis ? (
-                        <>
-                            {/* Risk Score Card */}
-                            <Paper elevation={2} sx={{ p: 3, mb: 3, bgcolor: getRiskColor(analysis.riskLevel), color: 'white' }}>
-                                <Typography variant="h6" gutterBottom>
-                                    Risk Assessment Complete
-                                </Typography>
-                                <Typography variant="h2" fontWeight="bold">
-                                    {analysis.riskLevel}
-                                </Typography>
-                                <Typography variant="h4">
-                                    Score: {analysis.riskScore}/100
-                                </Typography>
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={parseFloat(analysis.riskScore)}
-                                    sx={{ mt: 2, height: 10, borderRadius: 5, bgcolor: 'rgba(255,255,255,0.3)' }}
-                                />
-                            </Paper>
-
-                            {/* Risk Metrics */}
-                            <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-                                <Typography variant="h6" gutterBottom fontWeight="bold">
-                                    📊 Risk Metrics
-                                </Typography>
-                                <Grid container spacing={2}>
-                                    <Grid item xs={6}>
-                                        <Card sx={{ bgcolor: '#e3f2fd' }}>
-                                            <CardContent>
-                                                <Typography color="textSecondary" variant="caption">
-                                                    Total Value
-                                                </Typography>
-                                                <Typography variant="h5" fontWeight="bold">
-                                                    ${analysis.totalValue.toFixed(2)}
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Card sx={{ bgcolor: '#fff3e0' }}>
-                                            <CardContent>
-                                                <Typography color="textSecondary" variant="caption">
-                                                    Value at Risk (95%)
-                                                </Typography>
-                                                <Typography variant="h5" fontWeight="bold">
-                                                    ${analysis.valueAtRisk.toFixed(2)}
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Card sx={{ bgcolor: '#f3e5f5' }}>
-                                            <CardContent>
-                                                <Typography color="textSecondary" variant="caption">
-                                                    Volatility (σ)
-                                                </Typography>
-                                                <Typography variant="h5" fontWeight="bold">
-                                                    {analysis.standardDeviation.toFixed(2)}%
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Card sx={{ bgcolor: '#e8f5e9' }}>
-                                            <CardContent>
-                                                <Typography color="textSecondary" variant="caption">
-                                                    Diversification
-                                                </Typography>
-                                                <Typography variant="h5" fontWeight="bold">
-                                                    {analysis.diversificationScore.toFixed(0)}%
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-                                </Grid>
-                            </Paper>
-
-                            {/* AI Insight */}
-                            <Paper elevation={2} sx={{ p: 3, mb: 3, bgcolor: '#e8eaf6' }}>
-                                <Typography variant="h6" gutterBottom fontWeight="bold" display="flex" alignItems="center" gap={1}>
-                                    <AnalyticsIcon /> AI-Powered Insight
-                                </Typography>
-                                <Typography variant="body1" sx={{ fontStyle: 'italic' }}>
-                                    "{analysis.aiInsight}"
-                                </Typography>
-                            </Paper>
-
-                            {/* Recommendations */}
-                            <Paper elevation={2} sx={{ p: 3 }}>
-                                <Typography variant="h6" gutterBottom fontWeight="bold" display="flex" alignItems="center" gap={1}>
-                                    <WarningIcon /> Recommendations
-                                </Typography>
-                                {analysis.recommendations.map((rec, index) => (
-                                    <Alert
-                                        key={index}
-                                        severity={rec.includes('⚠️') ? 'warning' : rec.includes('✓') ? 'success' : 'info'}
-                                        sx={{ mb: 1 }}
-                                    >
-                                        {rec}
-                                    </Alert>
-                                ))}
-                            </Paper>
-                        </>
-                    ) : (
-                        <Paper elevation={2} sx={{ p: 5, textAlign: 'center', color: '#999' }}>
-                            <AnalyticsIcon sx={{ fontSize: 80, opacity: 0.3, mb: 2 }} />
-                            <Typography variant="h6">
-                                Add your portfolio holdings and click "Analyze Risk" to see results
-                            </Typography>
-                        </Paper>
-                    )}
-                </Grid>
-            </Grid>
-        </Container>
+                {/* Page Content */}
+                <main className="p-6">
+                    <div className="animate-slide-up">
+                        <ActiveComponent
+                            holdings={holdings}
+                            setHoldings={setHoldings}
+                            riskTolerance={riskTolerance}
+                            setRiskTolerance={setRiskTolerance}
+                            setAlertCount={setAlertCount}
+                        />
+                    </div>
+                </main>
+            </div>
+        </div>
     );
 }
 

@@ -32,3 +32,9 @@ Thumbs.db
 # Logs
 *.log
 logs/
+
+# API Keys & Secrets (NEVER COMMIT)
+backend/.env
+backend/compile-output.txt
+backend/src/main/resources/application.properties
+backend/target/
