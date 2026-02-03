@@ -83,9 +83,12 @@ public class AIRouterService {
             // #region agent log
             try {
                 String msg = e.getMessage() != null ? e.getMessage().replace("\"", "'") : "null";
-                String line = "{\"sessionId\":\"debug-session\",\"hypothesisId\":\"H3\",\"location\":\"AIRouterService.java:groqFailed\",\"message\":\"Groq failed, falling back to Gemini\",\"data\":{\"error\":\"" + msg + "\"},\"timestamp\":" + System.currentTimeMillis() + "}\n";
-                Files.write(Paths.get(System.getProperty("user.dir")).resolve("target").resolve("debug.log"), line.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-            } catch (Exception _e) {}
+                String line = "{\"sessionId\":\"debug-session\",\"hypothesisId\":\"H3\",\"location\":\"AIRouterService.java:groqFailed\",\"message\":\"Groq failed, falling back to Gemini\",\"data\":{\"error\":\""
+                        + msg + "\"},\"timestamp\":" + System.currentTimeMillis() + "}\n";
+                Files.write(Paths.get(System.getProperty("user.dir")).resolve("target").resolve("debug.log"),
+                        line.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            } catch (Exception _e) {
+            }
             // #endregion
             System.err.println("Groq failed, falling back to Gemini: " + e.getMessage());
         }
@@ -106,9 +109,13 @@ public class AIRouterService {
                 // #region agent log
                 try {
                     String msg = e.getMessage() != null ? e.getMessage().replace("\"", "'") : "null";
-                    String line = "{\"sessionId\":\"debug-session\",\"hypothesisId\":\"H3\",\"location\":\"AIRouterService.java:geminiFailed\",\"message\":\"Both AI services failed\",\"data\":{\"error\":\"" + msg + "\"},\"timestamp\":" + System.currentTimeMillis() + "}\n";
-                    Files.write(Paths.get(System.getProperty("user.dir")).resolve("target").resolve("debug.log"), line.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-                } catch (Exception _e) {}
+                    String line = "{\"sessionId\":\"debug-session\",\"hypothesisId\":\"H3\",\"location\":\"AIRouterService.java:geminiFailed\",\"message\":\"Both AI services failed\",\"data\":{\"error\":\""
+                            + msg + "\"},\"timestamp\":" + System.currentTimeMillis() + "}\n";
+                    Files.write(Paths.get(System.getProperty("user.dir")).resolve("target").resolve("debug.log"),
+                            line.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE,
+                            StandardOpenOption.APPEND);
+                } catch (Exception _e) {
+                }
                 // #endregion
                 System.err.println("Both AI services failed: " + e.getMessage());
             }
