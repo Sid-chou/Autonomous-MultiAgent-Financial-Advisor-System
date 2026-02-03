@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
-import { TrendingUp, Trash2, Plus, BarChart3, PieChart as PieChartIcon } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { TrendingUp, Trash2, Plus, BarChart3, PieChart as PieChartIcon, Download, Save } from 'lucide-react';
 import axios from 'axios';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { useToast } from '../context/ToastContext';
+import { savePortfolio, saveRiskTolerance, exportPortfolioWithMetadata } from '../utils/localStorage';
+import LoadingSpinner from './LoadingSpinner';
 
 const COLORS = ['#4A6CF7', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
@@ -9,6 +12,19 @@ function RiskPanel({ holdings, setHoldings, riskTolerance, setRiskTolerance }) {
     const [analysis, setAnalysis] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const toast = useToast();
+
+    // Auto-save portfolio whenever it changes
+    useEffect(() => {
+        if (holdings.length > 0) {
+            savePortfolio(holdings);
+        }
+    }, [holdings]);
+
+    // Auto-save risk tolerance whenever it changes
+    useEffect(() => {
+        saveRiskTolerance(riskTolerance);
+    }, [riskTolerance]);
 
     const addHolding = () => {
         setHoldings([...holdings, { symbol: '', quantity: 0, purchasePrice: 0, currentPrice: 0 }]);
@@ -25,6 +41,11 @@ function RiskPanel({ holdings, setHoldings, riskTolerance, setRiskTolerance }) {
     };
 
     const analyzeRisk = async () => {
+        if (holdings.length === 0) {
+            toast.warning('Please add at least one holding to analyze');
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
@@ -33,11 +54,43 @@ function RiskPanel({ holdings, setHoldings, riskTolerance, setRiskTolerance }) {
                 holdings, riskTolerance
             });
             setAnalysis(response.data);
+            toast.success('Portfolio risk analysis complete!');
         } catch (err) {
-            setError('Failed to connect to Risk Agent. Ensure backend is running on port 8080.');
+            const errorMsg = 'Failed to connect to Risk Agent. Ensure backend is running on port 8080.';
+            setError(errorMsg);
+            toast.error(errorMsg);
             console.error(err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleExportPortfolio = () => {
+        if (holdings.length === 0) {
+            toast.warning('No portfolio data to export');
+            return;
+        }
+
+        try {
+            exportPortfolioWithMetadata(holdings, riskTolerance, analysis);
+            toast.success('Portfolio exported successfully!');
+        } catch (err) {
+            toast.error('Failed to export portfolio');
+            console.error(err);
+        }
+    };
+
+    const handleSavePortfolio = () => {
+        if (holdings.length === 0) {
+            toast.warning('No portfolio data to save');
+            return;
+        }
+
+        const saved = savePortfolio(holdings);
+        if (saved) {
+            toast.success('Portfolio saved successfully!');
+        } else {
+            toast.error('Failed to save portfolio');
         }
     };
 
@@ -168,15 +221,45 @@ function RiskPanel({ holdings, setHoldings, riskTolerance, setRiskTolerance }) {
                         ))}
                     </div>
 
-                    {/* Add Holding Button */}
-                    <button
-                        onClick={addHolding}
-                        className="w-full mt-4 flex items-center justify-center gap-2 py-3 px-4 text-white font-medium rounded-lg hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
-                        style={{ backgroundColor: '#4A6CF7' }}
-                    >
-                        <Plus className="w-5 h-5" />
-                        Add Holding
-                    </button>
+                    {/* Action Buttons */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+                        <button
+                            onClick={addHolding}
+                            className="flex items-center justify-center gap-2 py-3 px-4 text-white font-medium rounded-lg hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
+                            style={{ backgroundColor: '#4A6CF7' }}
+                        >
+                            <Plus className="w-5 h-5" />
+                            Add Holding
+                        </button>
+
+                        <button
+                            onClick={handleSavePortfolio}
+                            disabled={holdings.length === 0}
+                            className="flex items-center justify-center gap-2 py-3 px-4 font-medium rounded-lg border transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={{
+                                backgroundColor: 'white',
+                                borderColor: '#4A6CF7',
+                                color: '#4A6CF7'
+                            }}
+                        >
+                            <Save className="w-5 h-5" />
+                            Save
+                        </button>
+
+                        <button
+                            onClick={handleExportPortfolio}
+                            disabled={holdings.length === 0}
+                            className="flex items-center justify-center gap-2 py-3 px-4 font-medium rounded-lg border transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={{
+                                backgroundColor: 'white',
+                                borderColor: '#10B981',
+                                color: '#10B981'
+                            }}
+                        >
+                            <Download className="w-5 h-5" />
+                            Export CSV
+                        </button>
+                    </div>
 
                     {/* Risk Tolerance */}
                     <div className="mt-6 pt-6 border-t" style={{ borderColor: '#E0E4EC' }}>
@@ -264,7 +347,11 @@ function RiskPanel({ holdings, setHoldings, riskTolerance, setRiskTolerance }) {
 
             {/* Right Panel: Analysis Results */}
             <div>
-                {analysis ? (
+                {loading ? (
+                    <div className="bg-white rounded-xl border shadow-sm p-6" style={{ borderColor: '#E0E4EC', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                        <LoadingSpinner size="lg" message="Analyzing your portfolio with AI..." />
+                    </div>
+                ) : analysis ? (
                     <div className="space-y-6">
                         {/* Risk Score Card */}
                         <div className={`${getRiskColor(analysis.riskLevel).bg} rounded-xl p-6 shadow-lg`}>

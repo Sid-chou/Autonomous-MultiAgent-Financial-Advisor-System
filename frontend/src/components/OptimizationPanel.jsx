@@ -2,13 +2,21 @@ import React, { useState } from 'react';
 import { TrendingUp, RefreshCw, ArrowRightLeft, BarChart3 } from 'lucide-react';
 import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { useToast } from '../context/ToastContext';
+import LoadingSpinner from './LoadingSpinner';
 
 function OptimizationPanel({ holdings, riskTolerance }) {
     const [optimization, setOptimization] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const toast = useToast();
 
     const optimize = async () => {
+        if (!holdings || holdings.length === 0) {
+            toast.warning('Please add holdings in the Risk Analysis panel first');
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
@@ -17,8 +25,11 @@ function OptimizationPanel({ holdings, riskTolerance }) {
                 holdings, riskTolerance
             });
             setOptimization(response.data);
+            toast.success('Portfolio optimization complete!');
         } catch (err) {
-            setError('Failed to connect to Optimization Agent');
+            const errorMsg = 'Failed to connect to Optimization Agent';
+            setError(errorMsg);
+            toast.error(errorMsg);
             console.error(err);
         } finally {
             setLoading(false);

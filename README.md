@@ -55,15 +55,61 @@ The application will be available at `http://localhost:3000`
 
 ## 📊 Features
 
-- **Risk Analysis Agent** - Portfolio risk assessment with AI insights
-- **Optimization Agent** - Portfolio rebalancing recommendations
-- **Market Analysis Agent** - Real-time Indian market monitoring (NSE/BSE)
+### 🤖 AI-Powered Agents
+- **Risk Analysis Agent** - Portfolio risk assessment with AI insights using Groq's LLaMA models
+- **Optimization Agent** - Portfolio rebalancing recommendations with trade suggestions
+- **Market Analysis Agent** - Real-time Indian market monitoring (NSE/BSE) with trend analysis
 - **Alert Agent** - Intelligent portfolio alerts and notifications
 
-## 🎨 Modern SaaS Dashboard
+### 💼 Portfolio Management
+- **Add/Remove Holdings** - Manage your Indian stock portfolio (NSE/BSE symbols)
+- **Auto-Save** - Portfolio automatically saved to browser localStorage
+- **Export to CSV** - Download your portfolio with risk analysis data
+- **Risk Tolerance** - Configure conservative, moderate, or aggressive risk profiles
+- **Portfolio Distribution** - Visual pie chart showing asset allocation
 
-- Light grayish-blue background
-- Dark navy collapsible sidebar
-- Royal blue accent colors
-- Clean white cards with soft shadows
-- Professional Inter typography
+### 📈 Analytics & Insights
+- **Risk Scoring** - AI-calculated risk score (0-100) with visual indicators
+- **Volatility Analysis** - Standard deviation and sharpe ratio calculations
+- **Drawdown Analysis** - Maximum historical drawdown tracking
+- **Rebalancing Trades** - Specific buy/sell recommendations to optimize allocation
+- **Sector Performance** - Track leading and lagging sectors in Indian markets
+- **Market Sentiment** - Real-time bullish/bearish market analysis
+
+### 🎨 Modern SaaS Dashboard
+
+- **Light Theme** - Professional light grayish-blue background (#E8ECF4)
+- **Collapsible Sidebar** - Dark navy sidebar with smooth animations
+- **Royal Blue Accents** - Consistent color scheme throughout (#4A6CF7)
+- **White Cards** - Clean cards with soft shadows for content organization
+- **Toast Notifications** - Real-time feedback for all user actions
+- **Loading States** - Spinners and progress indicators for better UX
+- **Error Handling** - Graceful error boundaries and user-friendly messages
+- **Responsive Design** - Works on desktop, tablet, and mobile devices
+- **Professional Typography** - Inter font family for readability
+
+### 🔒 Security & Privacy
+- **Local Storage Only** - All data stored in browser, no external database
+- **API Key Protection** - Sensitive keys kept in gitignored configuration
+- **Error Boundaries** - Prevents crashes and data loss
+- **Template Configuration** - Safe example files for easy setup
+
+## 🛠️ Technology Stack
+
+**Frontend:**
+- React 18
+- Tailwind CSS
+- Recharts (data visualization)
+- Axios (API calls)
+- Lucide React (icons)
+
+**Backend:**
+- Spring Boot 3
+- Java 17
+- Groq AI (LLaMA 3.3 70B)
+- Google Gemini (backup)
+- Alpha Vantage API (market data)
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

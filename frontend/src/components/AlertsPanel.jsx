@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, AlertTriangle, Info, XCircle, CheckCircle, Trash2 } from 'lucide-react';
 import axios from 'axios';
+import { useToast } from '../context/ToastContext';
 
 function AlertsPanel({ holdings, setAlertCount }) {
     const [alerts, setAlerts] = useState([]);
+    const toast = useToast();
 
     const checkAlerts = async () => {
 
@@ -24,7 +26,9 @@ function AlertsPanel({ holdings, setAlertCount }) {
             await axios.delete('http://localhost:8080/api/alerts');
             setAlerts([]);
             setAlertCount(0);
+            toast.success('All alerts cleared successfully');
         } catch (err) {
+            toast.error('Failed to clear alerts');
             console.error('Failed to clear alerts:', err);
         }
     };

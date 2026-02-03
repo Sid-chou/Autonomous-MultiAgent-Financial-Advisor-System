@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, Minus, RefreshCw, LineChart } from 'lucide-react';
 import axios from 'axios';
+import { useToast } from '../context/ToastContext';
 
 function MarketPanel() {
     const [market, setMarket] = useState(null);
@@ -8,6 +9,7 @@ function MarketPanel() {
     const [error, setError] = useState(null);
     const [lastUpdated, setLastUpdated] = useState(null);
     const [isLive, setIsLive] = useState(false);
+    const toast = useToast();
 
     const fetchMarket = async () => {
         setLoading(true);
@@ -18,8 +20,11 @@ function MarketPanel() {
             setMarket(response.data);
             setLastUpdated(new Date());
             setIsLive(true);
+            toast.success('Market data updated successfully');
         } catch (err) {
-            setError('Failed to fetch market data');
+            const errorMsg = 'Failed to fetch market data';
+            setError(errorMsg);
+            toast.error(errorMsg);
             console.error(err);
             setIsLive(false);
         } finally {

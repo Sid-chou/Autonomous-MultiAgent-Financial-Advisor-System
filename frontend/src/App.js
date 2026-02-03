@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     TrendingUp,
     Shield,
@@ -17,16 +17,34 @@ import OptimizationPanel from './components/OptimizationPanel';
 import MarketPanel from './components/MarketPanel';
 import AlertsPanel from './components/AlertsPanel';
 
+// Import utilities
+import { loadPortfolio, loadRiskTolerance } from './utils/localStorage';
+
 function App() {
     const [activeTab, setActiveTab] = useState(0);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-    const [holdings, setHoldings] = useState([
-        { symbol: 'RELIANCE.NS', quantity: 10, purchasePrice: 2400, currentPrice: 2550 },
-        { symbol: 'TCS.NS', quantity: 5, purchasePrice: 3200, currentPrice: 3450 },
-        { symbol: 'INFY.NS', quantity: 8, purchasePrice: 1450, currentPrice: 1520 }
-    ]);
+    const [holdings, setHoldings] = useState([]);
     const [riskTolerance, setRiskTolerance] = useState('moderate');
-    const [alertCount, setAlertCount] = useState(3);
+    const [alertCount, setAlertCount] = useState(0);
+
+    // Load saved data on mount
+    useEffect(() => {
+        const savedPortfolio = loadPortfolio();
+        const savedRiskTolerance = loadRiskTolerance();
+
+        if (savedPortfolio && savedPortfolio.length > 0) {
+            setHoldings(savedPortfolio);
+        } else {
+            // Default holdings if none saved
+            setHoldings([
+                { symbol: 'RELIANCE.NS', quantity: 10, purchasePrice: 2400, currentPrice: 2550 },
+                { symbol: 'TCS.NS', quantity: 5, purchasePrice: 3200, currentPrice: 3450 },
+                { symbol: 'INFY.NS', quantity: 8, purchasePrice: 1450, currentPrice: 1520 }
+            ]);
+        }
+
+        setRiskTolerance(savedRiskTolerance);
+    }, []);
 
     const tabConfig = [
         { label: 'Risk Analysis', icon: Shield },
