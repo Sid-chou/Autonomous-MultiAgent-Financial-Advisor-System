@@ -37,3 +37,13 @@ agent.alert.check.interval=60000
 # Cache Configuration
 cache.ai.enabled=true
 cache.ai.ttl=3600
+
+# Sentiment Service Configuration
+sentiment.service.url=http://localhost:5000
+sentiment.service.timeout=30000
+
+# Reddit API Configuration (Optional - for social sentiment)
+# Get credentials from: https://www.reddit.com/prefs/apps
+reddit.enabled=false
+reddit.client.id=YOUR_REDDIT_CLIENT_ID
+reddit.client.secret=YOUR_REDDIT_CLIENT_SECRET
