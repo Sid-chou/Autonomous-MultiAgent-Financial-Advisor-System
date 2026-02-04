@@ -1,4 +1,4 @@
-package com.fintech.riskagent.model;
+package com.financial.riskagent.model;
 
 import java.util.List;
 import java.util.Map;

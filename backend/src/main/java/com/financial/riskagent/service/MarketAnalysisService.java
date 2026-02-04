@@ -136,15 +136,23 @@ public class MarketAnalysisService {
         try {
             // #region agent log
             try {
-                String d = "{\"alphaKeyNull\":" + (alphaVantageApiKey == null) + ",\"alphaKeyEmpty\":" + (alphaVantageApiKey != null && alphaVantageApiKey.isEmpty()) + ",\"alphaKeyLength\":" + (alphaVantageApiKey == null ? 0 : alphaVantageApiKey.length()) + ",\"symbol\":\"" + symbol + "\"}";
-                String line = "{\"sessionId\":\"debug-session\",\"hypothesisId\":\"H1\",\"hypothesisId2\":\"H5\",\"location\":\"MarketAnalysisService.java:fetchRealTimeIndexData\",\"message\":\"Alpha Vantage fetch entry\",\"data\":" + d + ",\"timestamp\":" + System.currentTimeMillis() + "}\n";
-                Files.write(Paths.get(System.getProperty("user.dir")).resolve("target").resolve("debug.log"), line.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-            } catch (Exception _e) {}
+                String d = "{\"alphaKeyNull\":" + (alphaVantageApiKey == null) + ",\"alphaKeyEmpty\":"
+                        + (alphaVantageApiKey != null && alphaVantageApiKey.isEmpty()) + ",\"alphaKeyLength\":"
+                        + (alphaVantageApiKey == null ? 0 : alphaVantageApiKey.length()) + ",\"symbol\":\"" + symbol
+                        + "\"}";
+                String line = "{\"sessionId\":\"debug-session\",\"hypothesisId\":\"H1\",\"hypothesisId2\":\"H5\",\"location\":\"MarketAnalysisService.java:fetchRealTimeIndexData\",\"message\":\"Alpha Vantage fetch entry\",\"data\":"
+                        + d + ",\"timestamp\":" + System.currentTimeMillis() + "}\n";
+                Files.write(Paths.get(System.getProperty("user.dir")).resolve("target").resolve("debug.log"),
+                        line.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            } catch (Exception _e) {
+            }
             // #endregion
             // Note: Alpha Vantage's free tier doesn't support Indian indices directly
             // We'll use GLOBAL_QUOTE endpoint as a workaround
+            // URL-encode the symbol to handle special characters like ^
+            String encodedSymbol = java.net.URLEncoder.encode(symbol, StandardCharsets.UTF_8);
             String url = String.format("%s?function=GLOBAL_QUOTE&symbol=%s&apikey=%s",
-                    alphaVantageApiUrl, symbol, alphaVantageApiKey);
+                    alphaVantageApiUrl, encodedSymbol, alphaVantageApiKey);
 
             // Make HTTP request
             java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
@@ -159,10 +167,16 @@ public class MarketAnalysisService {
             // #region agent log
             try {
                 int code = response.statusCode();
-                String bodyPreview = response.body().length() > 150 ? response.body().substring(0, 150).replace("\\", "\\\\").replace("\"", "'").replace("\n", " ") : response.body().replace("\\", "\\\\").replace("\"", "'").replace("\n", " ");
-                String line = "{\"sessionId\":\"debug-session\",\"hypothesisId\":\"H5\",\"location\":\"MarketAnalysisService.java:alphaResponse\",\"message\":\"Alpha Vantage response\",\"data\":{\"statusCode\":" + code + ",\"bodyPreview\":\"" + bodyPreview + "\"},\"timestamp\":" + System.currentTimeMillis() + "}\n";
-                Files.write(Paths.get(System.getProperty("user.dir")).resolve("target").resolve("debug.log"), line.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-            } catch (Exception _e) {}
+                String bodyPreview = response.body().length() > 150
+                        ? response.body().substring(0, 150).replace("\\", "\\\\").replace("\"", "'").replace("\n", " ")
+                        : response.body().replace("\\", "\\\\").replace("\"", "'").replace("\n", " ");
+                String line = "{\"sessionId\":\"debug-session\",\"hypothesisId\":\"H5\",\"location\":\"MarketAnalysisService.java:alphaResponse\",\"message\":\"Alpha Vantage response\",\"data\":{\"statusCode\":"
+                        + code + ",\"bodyPreview\":\"" + bodyPreview + "\"},\"timestamp\":" + System.currentTimeMillis()
+                        + "}\n";
+                Files.write(Paths.get(System.getProperty("user.dir")).resolve("target").resolve("debug.log"),
+                        line.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            } catch (Exception _e) {
+            }
             // #endregion
 
             // Parse JSON response

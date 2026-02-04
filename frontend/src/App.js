@@ -8,7 +8,8 @@ import {
     Settings,
     AlertTriangle,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Brain
 } from 'lucide-react';
 
 // Import panels
@@ -16,6 +17,7 @@ import RiskPanel from './components/RiskPanel';
 import OptimizationPanel from './components/OptimizationPanel';
 import MarketPanel from './components/MarketPanel';
 import AlertsPanel from './components/AlertsPanel';
+import SentimentPanel from './components/SentimentPanel';
 
 // Import utilities
 import { loadPortfolio, loadRiskTolerance } from './utils/localStorage';
@@ -50,10 +52,11 @@ function App() {
         { label: 'Risk Analysis', icon: Shield },
         { label: 'Optimization', icon: TrendingUp },
         { label: 'Market', icon: BarChart3 },
-        { label: 'Alerts', icon: AlertTriangle, badge: alertCount }
+        { label: 'Alerts', icon: AlertTriangle, badge: alertCount },
+        { label: 'Sentiment', icon: Brain }
     ];
 
-    const ActiveComponent = [RiskPanel, OptimizationPanel, MarketPanel, AlertsPanel][activeTab];
+    const ActiveComponent = [RiskPanel, OptimizationPanel, MarketPanel, AlertsPanel, SentimentPanel][activeTab];
 
     return (
         <div className="min-h-screen flex animate-fade-in" style={{ backgroundColor: '#E8ECF4' }}>

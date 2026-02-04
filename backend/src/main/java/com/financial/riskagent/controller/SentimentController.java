@@ -1,7 +1,7 @@
-package com.fintech.riskagent.controller;
+package com.financial.riskagent.controller;
 
-import com.fintech.riskagent.model.SentimentResponse;
-import com.fintech.riskagent.service.SentimentService;
+import com.financial.riskagent.model.SentimentResponse;
+import com.financial.riskagent.service.SentimentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

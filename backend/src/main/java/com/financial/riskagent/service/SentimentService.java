@@ -1,6 +1,6 @@
-package com.fintech.riskagent.service;
+package com.financial.riskagent.service;
 
-import com.fintech.riskagent.model.SentimentResponse;
+import com.financial.riskagent.model.SentimentResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
