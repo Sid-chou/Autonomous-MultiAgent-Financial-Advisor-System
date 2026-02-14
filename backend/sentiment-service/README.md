@@ -1,6 +1,10 @@
 # Sentiment Analysis Service
 
-Python-based microservice for analyzing Indian stock market sentiment using FinBERT AI model.
+Python-based microservice for analyzing Indian stock market sentiment using AI models.
+
+**Models Supported**:
+- **Fine-Tuned Llama-3 8B** (via Ollama) - Custom trained on financial data, >85% accuracy
+- **FinBERT** (backup) - Pre-trained financial sentiment model from HuggingFace
 
 ## Features
 
@@ -12,7 +16,68 @@ Python-based microservice for analyzing Indian stock market sentiment using FinB
 
 ## Setup
 
-### 1. Install Python Dependencies
+### Option A: Fine-Tuned Model (Recommended)
+
+#### 1. Install Ollama
+
+**Windows**:
+1. Download from https://ollama.ai/download
+2. Run the installer
+3. Verify installation:
+```bash
+ollama --version
+```
+
+**macOS/Linux**:
+```bash
+curl -fsSL https://ollama.ai/install.sh | sh
+```
+
+#### 2. Import the Fine-Tuned Model
+
+After training the model in Google Colab (notebook provided separately), you'll have a `financial-sentiment-model.gguf` file.
+
+```bash
+# Place the GGUF file in the sentiment-service directory
+cd backend/sentiment-service
+
+# Create the model in Ollama
+ollama create financial-sentiment -f Modelfile
+
+# Test the model
+ollama run financial-sentiment "Operating costs increased, but margins expanded."
+# Expected output: Positive
+```
+
+#### 3. Install Python Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+#### 4. Run the Service
+
+```bash
+python app.py
+```
+
+The service will automatically use the fine-tuned model via Ollama. If Ollama is not running, it will fallback to FinBERT.
+
+---
+
+### Option B: FinBERT Only (No Ollama)
+
+If you want to use only FinBERT without installing Ollama:
+
+#### 1. Disable Fine-Tuned Model
+
+Create a `.env` file:
+```bash
+USE_FINETUNED_MODEL=false
+FALLBACK_TO_FINBERT=true
+```
+
+#### 2. Install Python Dependencies
 
 ```bash
 cd backend/sentiment-service

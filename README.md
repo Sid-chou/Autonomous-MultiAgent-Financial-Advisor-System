@@ -60,6 +60,9 @@ The application will be available at `http://localhost:3000`
 - **Optimization Agent** - Portfolio rebalancing recommendations with trade suggestions
 - **Market Analysis Agent** - Real-time Indian market monitoring (NSE/BSE) with trend analysis
 - **Alert Agent** - Intelligent portfolio alerts and notifications
+- **Planning Agent** - Goal-based financial planning with SIP calculator and retirement planning
+- **Sentiment Agent** - Market sentiment analysis from news and social media
+- **Execution Agent** ⭐ - Trade execution simulation with order management and rebalancing automation
 
 ### 💼 Portfolio Management
 - **Add/Remove Holdings** - Manage your Indian stock portfolio (NSE/BSE symbols)
@@ -75,6 +78,9 @@ The application will be available at `http://localhost:3000`
 - **Rebalancing Trades** - Specific buy/sell recommendations to optimize allocation
 - **Sector Performance** - Track leading and lagging sectors in Indian markets
 - **Market Sentiment** - Real-time bullish/bearish market analysis
+- **Trade Execution** - Simulate trade orders with 95% success rate
+- **Order Management** - Track pending, executed, and failed orders
+- **Execution Statistics** - Monitor success rate, order volume, and trade history
 
 ### 🎨 Modern SaaS Dashboard
 

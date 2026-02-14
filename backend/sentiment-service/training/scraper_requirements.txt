@@ -1,0 +1,14 @@
+# Dependencies for Indian dataset scraping
+
+# Core scraping
+beautifulsoup4==4.12.2
+requests==2.31.0
+feedparser==6.0.10
+
+# Data processing
+pandas==2.0.3
+
+
+
+# Note: Install with:
+# pip install -r scraper_requirements.txt

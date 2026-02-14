@@ -1,17 +1,18 @@
 """
 FinBERT Sentiment Analyzer
 Wrapper for FinBERT model from Hugging Face
+Used as fallback when fine-tuned model is unavailable
 """
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 import torch
 import config
 
-class SentimentAnalyzer:
+class FinBERTAnalyzer:
     _instance = None  # Singleton pattern
     
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(SentimentAnalyzer, cls).__new__(cls)
+            cls._instance = super(FinBERTAnalyzer, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
     
@@ -166,4 +167,4 @@ class SentimentAnalyzer:
             return "NEUTRAL"
 
 # Global instance
-analyzer = SentimentAnalyzer()
+finbert_analyzer = FinBERTAnalyzer()

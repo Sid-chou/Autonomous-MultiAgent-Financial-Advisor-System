@@ -8,7 +8,7 @@ from datetime import datetime
 import config
 
 # Import modules
-from models.sentiment_analyzer import analyzer
+from models.analyzer_factory import analyzer, get_model_info
 from collectors.news_collector import NewsCollector
 from collectors.reddit_collector import RedditCollector
 from cache.cache_manager import cache
@@ -30,12 +30,17 @@ def health_check():
     """
     Health check endpoint
     """
+    model_info = get_model_info()
     return jsonify({
         "status": "healthy",
         "service": "sentiment-analysis",
-        "model": config.MODEL_NAME,
+        "model": model_info.get("model_name", "unknown"),
+        "active_model": model_info.get("active_model", "unknown"),
+        "provider": model_info.get("provider", "unknown"),
         "timestamp": datetime.now().isoformat(),
-        "reddit_enabled": config.REDDIT_ENABLED
+        "reddit_enabled": config.REDDIT_ENABLED,
+        "ollama_enabled": config.USE_FINETUNED_MODEL,
+        "fallback_available": model_info.get("fallback_available", False)
     })
 
 @app.route('/api/v1/analyze-sentiment', methods=['POST'])
@@ -234,6 +239,65 @@ def clear_cache():
     """
     cache.clear()
     return jsonify({"message": "Cache cleared successfully"})
+
+@app.route('/api/v1/model-info', methods=['GET'])
+def model_info():
+    """
+    Get detailed model information
+    """
+    info = get_model_info()
+    return jsonify(info)
+
+@app.route('/api/v1/test-finetuned', methods=['POST'])
+def test_finetuned():
+    """
+    Test the fine-tuned model directly (bypass cache)
+    
+    Request Body:
+        {
+            "text": "The company reported strong earnings growth."
+        }
+    
+    Response:
+        {
+            "text": "...",
+            "sentiment": "POSITIVE",
+            "score": 0.85,
+            "model": "financial-sentiment"
+        }
+    """
+    try:
+        data = request.get_json()
+        text = data.get('text', '')
+        
+        if not text:
+            return jsonify({"error": "Text is required"}), 400
+        
+        # Get current model info
+        info = get_model_info()
+        
+        # Analyze with current analyzer
+        result = analyzer.analyze_text(text)
+        
+        return jsonify({
+            "text": text,
+            "sentiment": result['label'].upper(),
+            "score": result['score'],
+            "model": info.get("model_name", "unknown"),
+            "active_model": info.get("active_model", "unknown"),
+            "timestamp": datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        print(f"Error in test endpoint: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        return jsonify({
+            "error": "Internal server error",
+            "message": str(e)
+        }), 500
+
 
 if __name__ == '__main__':
     print("\n" + "=" * 50)

@@ -78,3 +78,24 @@ TICKER_MAPPINGS = {
     "WIPRO": "Wipro",
     "TITAN": "Titan Company"
 }
+
+# Fine-Tuned Model Configuration (Ollama)
+USE_FINETUNED_MODEL = os.getenv('USE_FINETUNED_MODEL', 'true').lower() == 'true'
+OLLAMA_API_URL = os.getenv('OLLAMA_API_URL', 'http://localhost:11434')
+OLLAMA_MODEL_NAME = os.getenv('OLLAMA_MODEL_NAME', 'financial-sentiment')
+FALLBACK_TO_FINBERT = os.getenv('FALLBACK_TO_FINBERT', 'true').lower() == 'true'
+
+# Ollama System Prompt
+OLLAMA_SYSTEM_PROMPT = """You are a senior financial analyst specialized in sentiment analysis. Analyze financial news, headlines, and social media posts.
+
+Your task is to classify the sentiment as EXACTLY one word:
+- Positive (bullish, good news for stock price)
+- Negative (bearish, bad news for stock price)  
+- Neutral (mixed or unclear impact)
+
+Respond with ONLY the sentiment word. No explanations, no additional text."""
+
+# Ollama Request Configuration
+OLLAMA_TIMEOUT = 10  # seconds
+OLLAMA_TEMPERATURE = 0.1  # Low temperature for consistent output
+
