@@ -9,7 +9,7 @@ PORT = 5000
 HOST = '0.0.0.0'
 
 # Model Configuration
-MODEL_NAME = "ProsusAI/finbert"  # FinBERT model from Hugging Face
+MODEL_NAME = "models/finbert_indian_best"  # FinBERT model from local Hugging Face path
 MAX_LENGTH = 512  # Maximum token length for FinBERT
 
 # Cache Configuration
@@ -24,19 +24,24 @@ REQUEST_TIMEOUT = 10  # seconds
 # News Sources (RSS Feeds - No Auth Required)
 NEWS_SOURCES = [
     {
-        "name": "Moneycontrol",
-        "url": "https://www.moneycontrol.com/rss/latestnews.xml",
-        "weight": 0.35
-    },
-    {
         "name": "Economic Times",
-        "url": "https://economictimes.indiatimes.com/rssfeedstopstories.cms",
-        "weight": 0.35
+        "url": "https://economictimes.indiatimes.com/rssfeedsdefault.cms",
+        "weight": 0.30
     },
     {
-        "name": "Business Standard",
-        "url": "https://www.business-standard.com/rss/markets-106.rss",
-        "weight": 0.30
+        "name": "Financial Express",
+        "url": "https://www.financialexpress.com/feed/",
+        "weight": 0.25
+    },
+    {
+        "name": "Hindu Business Line",
+        "url": "https://www.thehindubusinessline.com/feeder/default.rss",
+        "weight": 0.25
+    },
+    {
+        "name": "LiveMint",
+        "url": "https://www.livemint.com/rss/news",
+        "weight": 0.20
     }
 ]
 

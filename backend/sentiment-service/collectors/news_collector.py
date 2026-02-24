@@ -25,10 +25,31 @@ class NewsCollector:
         Returns:
             list: List of news articles with {title, summary, source, sentiment_text, url}
         """
+        ticker_clean = ticker.replace('.NS', '').replace('.BO', '').replace('.BSE', '').upper()
+        print(f"DEBUG ticker_clean: {ticker_clean}")
+    
         if not company_name:
-            company_name = config.TICKER_MAPPINGS.get(ticker, ticker)
+            company_name = config.TICKER_MAPPINGS.get(ticker_clean, ticker_clean)
+    
+        print(f"DEBUG company_name: {company_name}")
+    
+        search_terms = [ticker_clean, company_name]
+    
+        print(f"DEBUG search_terms: {search_terms}")
+    
+        all_articles = []
+    
+        for source in self.sources:
+            try:
+                articles = self._fetch_rss(source, search_terms)
+                print(f"DEBUG {source['name']} returned {len(articles)} articles")
+                all_articles.extend(articles)
+            except Exception as e:
+                print(f"Error fetching from {source['name']}: {e}")
+        if not company_name:
+            company_name = config.TICKER_MAPPINGS.get(ticker_clean, ticker_clean)
         
-        search_terms = [ticker, company_name]
+        search_terms = [ticker_clean, company_name]
         all_articles = []
         
         for source in self.sources:

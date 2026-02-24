@@ -6,6 +6,7 @@ Used as fallback when fine-tuned model is unavailable
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 import torch
 import config
+import os
 
 class FinBERTAnalyzer:
     _instance = None  # Singleton pattern
@@ -20,23 +21,42 @@ class FinBERTAnalyzer:
         if self._initialized:
             return
         
-        print(f"Loading FinBERT model: {config.MODEL_NAME}...")
+        print(f"Loading local FinBERT model...")
         
+        # Local model path — relative to sentiment_analyzer.py location
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        MODEL_PATH = os.path.join(BASE_DIR, 'models', 'finbert_indian_best')
+        
+        ID2LABEL = {0: "negative", 1: "neutral", 2: "positive"}
+        LABEL2ID = {"negative": 0, "neutral": 1, "positive": 2}
+
         # Load FinBERT model and tokenizer
-        self.tokenizer = AutoTokenizer.from_pretrained(config.MODEL_NAME)
-        self.model = AutoModelForSequenceClassification.from_pretrained(config.MODEL_NAME)
+        self.tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
+        self.model = AutoModelForSequenceClassification.from_pretrained(
+            MODEL_PATH,
+            id2label=ID2LABEL,
+            label2id=LABEL2ID
+        )
         
         # Create sentiment analysis pipeline
         self.analyzer = pipeline(
-            "sentiment-analysis",
+            "text-classification",
             model=self.model,
             tokenizer=self.tokenizer,
             device=0 if torch.cuda.is_available() else -1  # GPU if available
         )
         
-        print("FinBERT model loaded successfully!")
+        print("FinBERT local model loaded successfully!")
         self._initialized = True
     
+    def convert_to_sentiment_score(self, label: str, confidence: float) -> float:
+        if label == "positive":
+            return round(confidence, 4)
+        elif label == "negative":
+            return round(-confidence, 4)
+        else:  # neutral
+            return 0.0
+
     def analyze_text(self, text):
         """
         Analyze sentiment of a single text
@@ -55,13 +75,26 @@ class FinBERTAnalyzer:
         
         try:
             result = self.analyzer(text)[0]
+            label = result['label'].lower()
+            confidence = float(result['score'])
+            sentiment_score = self.convert_to_sentiment_score(label, confidence)
+            
             return {
-                "label": result['label'].lower(),
-                "score": result['score']
+                "sentiment_score": sentiment_score,
+                "confidence": confidence,
+                "label": label,
+                "status": "OK",
+                "error": None
             }
         except Exception as e:
             print(f"Error analyzing text: {e}")
-            return {"label": "neutral", "score": 0.5}
+            return {
+                "sentiment_score": None,
+                "confidence": None,
+                "label": None,
+                "status": "NULL",
+                "error": str(e)
+            }
     
     def analyze_batch(self, texts):
         """
@@ -81,16 +114,28 @@ class FinBERTAnalyzer:
         
         try:
             results = self.analyzer(texts)
-            return [
-                {
-                    "label": r['label'].lower(),
-                    "score": r['score']
-                }
-                for r in results
-            ]
+            output = []
+            for r in results:
+                label = r['label'].lower()
+                confidence = float(r['score'])
+                sentiment_score = self.convert_to_sentiment_score(label, confidence)
+                output.append({
+                    "sentiment_score": sentiment_score,
+                    "confidence": confidence,
+                    "label": label,
+                    "status": "OK",
+                    "error": None
+                })
+            return output
         except Exception as e:
             print(f"Error in batch analysis: {e}")
-            return [{"label": "neutral", "score": 0.5} for _ in texts]
+            return [{
+                "sentiment_score": None,
+                "confidence": None,
+                "label": None,
+                "status": "NULL",
+                "error": str(e)
+            } for _ in texts]
     
     def aggregate_sentiments(self, sentiments, weights=None):
         """
@@ -123,15 +168,18 @@ class FinBERTAnalyzer:
         neutral_score = 0.0
         
         for sentiment, weight in zip(sentiments, weights):
+            if sentiment.get("status") == "NULL":
+                continue
+                
             label = sentiment['label']
-            score = sentiment['score']
+            confidence = sentiment['confidence']
             
             if label == 'positive':
-                positive_score += score * weight
+                positive_score += confidence * weight
             elif label == 'negative':
-                negative_score += score * weight
+                negative_score += confidence * weight
             else:  # neutral
-                neutral_score += score * weight
+                neutral_score += confidence * weight
         
         # Normalize to sum to 1.0
         total = positive_score + negative_score + neutral_score

@@ -85,11 +85,13 @@ def analyze_sentiment():
         print(f"{'='*50}")
         
         # Get company name
-        company_name = config.TICKER_MAPPINGS.get(ticker, ticker)
+        # Get company name — strip exchange suffix before lookup
+        ticker_clean = ticker.replace('.NS', '').replace('.BO', '').replace('.BSE', '')
+        company_name = config.TICKER_MAPPINGS.get(ticker_clean, ticker_clean)
         
         # Collect news articles
         print("Collecting news articles...")
-        news_articles = news_collector.collect_news(ticker, company_name)
+        news_articles = news_collector.collect_news(ticker_clean, company_name)
         print(f"Found {len(news_articles)} news articles")
         
         # Collect Reddit posts (if enabled)
@@ -102,17 +104,11 @@ def analyze_sentiment():
         # Check if we have any data
         if len(news_articles) == 0 and len(reddit_posts) == 0:
             return jsonify({
-                "ticker": ticker,
-                "overallSentiment": "NEUTRAL",
-                "positiveScore": 0.33,
-                "negativeScore": 0.33,
-                "neutralScore": 0.34,
-                "confidenceScore": 0.0,
-                "newsCount": 0,
-                "socialCount": 0,
-                "sources": [],
-                "message": "No recent news or social media data found",
-                "timestamp": datetime.now().isoformat()
+                "sentiment_score": 0.0,
+                "confidence": 0.0,
+                "label": "neutral",
+                "status": "OK",
+                "error": "No recent news or social media data found"
             })
         
         # Analyze news sentiments
@@ -130,7 +126,7 @@ def analyze_sentiment():
                     "title": article['title'],
                     "source": article['source'],
                     "sentiment": sentiment['label'].upper(),
-                    "score": round(sentiment['score'], 3),
+                    "score": round(sentiment['sentiment_score'], 3),
                     "url": article.get('url', '')
                 })
         
@@ -186,21 +182,22 @@ def analyze_sentiment():
         )
         
         # Build response
+        if overall_sentiment == "BULLISH":
+            final_label = "positive"
+            sentiment_sc = round(confidence, 4)
+        elif overall_sentiment == "BEARISH":
+            final_label = "negative"
+            sentiment_sc = round(-confidence, 4)
+        else:
+            final_label = "neutral"
+            sentiment_sc = 0.0
+            
         result = {
-            "ticker": ticker,
-            "companyName": company_name,
-            "overallSentiment": overall_sentiment,
-            "positiveScore": final_scores['positive'],
-            "negativeScore": final_scores['negative'],
-            "neutralScore": final_scores['neutral'],
-            "confidenceScore": round(confidence, 4),
-            "newsCount": len(news_articles),
-            "socialCount": len(reddit_posts),
-            "sources": {
-                "news": news_sources[:10],  # Top 10 news
-                "social": social_sources[:10]  # Top 10 social
-            },
-            "timestamp": datetime.now().isoformat()
+            "sentiment_score": sentiment_sc,
+            "confidence": round(confidence, 4),
+            "label": final_label,
+            "status": "OK",
+            "error": None
         }
         
         # Cache the result
@@ -221,9 +218,12 @@ def analyze_sentiment():
         traceback.print_exc()
         
         return jsonify({
-            "error": "Internal server error",
-            "message": str(e)
-        }), 500
+            "sentiment_score": None,
+            "confidence": None,
+            "label": None,
+            "status": "NULL",
+            "error": str(e)
+        }), 200
 
 @app.route('/cache-stats', methods=['GET'])
 def get_cache_stats():
@@ -282,7 +282,7 @@ def test_finetuned():
         return jsonify({
             "text": text,
             "sentiment": result['label'].upper(),
-            "score": result['score'],
+            "score": result['sentiment_score'],
             "model": info.get("model_name", "unknown"),
             "active_model": info.get("active_model", "unknown"),
             "timestamp": datetime.now().isoformat()
