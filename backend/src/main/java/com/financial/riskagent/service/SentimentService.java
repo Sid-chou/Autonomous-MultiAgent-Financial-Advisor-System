@@ -75,14 +75,11 @@ public class SentimentService {
     private SentimentResponse createFallbackResponse(String ticker, String errorMessage) {
         SentimentResponse fallback = new SentimentResponse();
         fallback.setTicker(ticker);
-        fallback.setOverallSentiment("NEUTRAL");
-        fallback.setPositiveScore(0.33);
-        fallback.setNegativeScore(0.33);
-        fallback.setNeutralScore(0.34);
+        fallback.setLabel("neutral");
+        fallback.setSentimentScore(0.0);
         fallback.setConfidenceScore(0.0);
-        fallback.setNewsCount(0);
-        fallback.setSocialCount(0);
-        fallback.setMessage("Sentiment service unavailable: " + errorMessage);
+        fallback.setStatus("NULL");
+        fallback.setError("Sentiment service unavailable: " + errorMessage);
         return fallback;
     }
 }

@@ -20,6 +20,8 @@ dist/
 # IDEs
 .idea/
 .vscode/
+*.cursor/
+.cursor/
 *.iml
 .project
 .classpath
@@ -38,3 +40,23 @@ backend/.env
 backend/compile-output.txt
 backend/src/main/resources/application.properties
 backend/target/
+
+# FinBERT Model Files (400MB+ — too large for GitHub)
+# Download instructions are in the README
+backend/sentiment-service/models/finbert_indian_best/model.safetensors
+backend/sentiment-service/models/finbert_indian_best/*.bin
+*.safetensors
+*.bin
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Training Datasets (large CSV files)
+backend/sentiment-service/training/*.csv
+backend/sentiment-service/training/datausing/*.csv
+merged_indian_dataset.csv
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/

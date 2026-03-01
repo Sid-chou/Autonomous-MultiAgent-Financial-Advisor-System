@@ -46,18 +46,7 @@ class NewsCollector:
                 all_articles.extend(articles)
             except Exception as e:
                 print(f"Error fetching from {source['name']}: {e}")
-        if not company_name:
-            company_name = config.TICKER_MAPPINGS.get(ticker_clean, ticker_clean)
-        
-        search_terms = [ticker_clean, company_name]
-        all_articles = []
-        
-        for source in self.sources:
-            try:
-                articles = self._fetch_rss(source, search_terms)
-                all_articles.extend(articles)
-            except Exception as e:
-                print(f"Error fetching from {source['name']}: {e}")
+
         
         # Sort by relevance (title match) and limit
         all_articles = self._rank_articles(all_articles, search_terms)
@@ -77,7 +66,9 @@ class NewsCollector:
         articles = []
         
         try:
-            feed = feedparser.parse(source['url'])
+            # Use requests with a timeout to prevent hanging
+            response = requests.get(source['url'], timeout=10)
+            feed = feedparser.parse(response.content)
             
             for entry in feed.entries:
                 title = entry.get('title', '')

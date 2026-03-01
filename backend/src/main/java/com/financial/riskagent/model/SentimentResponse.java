@@ -17,6 +17,10 @@ public class SentimentResponse {
     private String timestamp;
     private String cachedAt;
     private String message;
+    private String status;
+    private String error;
+    private String label;
+    private Double sentiment_score;
 
     // Nested class for individual sources
     public static class SentimentSource {
@@ -180,5 +184,39 @@ public class SentimentResponse {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    @com.fasterxml.jackson.annotation.JsonProperty("sentiment_score")
+    public Double getSentimentScore() {
+        return sentiment_score;
+    }
+
+    @com.fasterxml.jackson.annotation.JsonProperty("sentiment_score")
+    public void setSentimentScore(Double sentiment_score) {
+        this.sentiment_score = sentiment_score;
     }
 }
