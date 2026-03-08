@@ -6,7 +6,8 @@ requests==2.31.0
 feedparser==6.0.10
 
 # Data processing
-pandas>=2.1.0
+numpy>=1.26.0
+pandas>=2.2.0
 
 
 

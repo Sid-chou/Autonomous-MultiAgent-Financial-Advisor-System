@@ -30,7 +30,9 @@ jobs:
           cache-dependency-path: 'backend/sentiment-service/training/scraper_requirements.txt'
 
       - name: "\U0001F4E6 Install dependencies"
-        run: pip install -r scraper_requirements.txt
+        run: |
+          pip install --upgrade numpy pandas
+          pip install -r scraper_requirements.txt
         working-directory: backend/sentiment-service/training
 
       - name: "\U0001F552 Display current time in IST"
