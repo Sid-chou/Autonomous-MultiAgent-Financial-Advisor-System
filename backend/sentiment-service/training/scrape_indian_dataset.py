@@ -215,7 +215,9 @@ class EnhancedIndianScraper:
     def save_to_csv(self, filename=None):
         """Save with deduplication and labeling - appends to existing file"""
         if filename is None:
-            filename = f'indian_financial_dataset_{datetime.now().strftime("%Y%m%d")}.csv'
+            # Default: append to the main project dataset
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            filename = os.path.join(script_dir, 'datausing', 'final_labeled_project_data.csv')
         
         print(f"\n💾 Saving to {filename}...")
         
@@ -290,7 +292,10 @@ def main():
     scraper.scrape_reddit_bulk(max_posts=500)
     
     # 5. Save
-    df = scraper.save_to_csv()
+    # Save / append to the final project dataset
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    output_path = os.path.join(script_dir, 'datausing', 'final_labeled_project_data.csv')
+    df = scraper.save_to_csv(output_path)
     
     print("\n" + "="*60)
     print("🎯 To reach 10,000+ articles:")
