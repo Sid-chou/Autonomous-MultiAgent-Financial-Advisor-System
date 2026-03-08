@@ -16,7 +16,7 @@ from typing import List, Dict
 
 # Optional: News API
 # Replace 'YOUR_API_KEY_HERE' with your actual key from newsapi.org
-NEWS_API_KEY = 'a767cd3c6f85465890fb647bfbe69152'  # Get free key from https://newsapi.org/register
+NEWS_API_KEY = os.environ.get('NEWS_API_KEY', '')  # Set via GitHub Secrets or environment variable
 
 
 class EnhancedIndianScraper:
