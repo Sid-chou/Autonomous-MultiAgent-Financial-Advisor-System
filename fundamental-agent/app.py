@@ -1,7 +1,10 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from data_fetcher import UpstreamTemporaryError, fetch_metrics, validate_metrics
+from dotenv import load_dotenv
+
+load_dotenv()
 from analyzer import build_prompt, call_groq
+from data_fetcher import fetch_metrics, validate_metrics
 from scorer import convert_to_score
 import logging
 
@@ -80,14 +83,17 @@ def analyze_fundamental():
             }
         )
 
-    except UpstreamTemporaryError as e:
-        logger.warning("Temporary upstream error for %s: %s", ticker, e)
-        return jsonify(
-            null_response(
-                ticker if "ticker" in locals() else None,
-                str(e),
-            )
-        )
+    except RuntimeError as e:
+        return jsonify({
+            "ticker": ticker if 'ticker' in locals() else None,
+            "valuation_signal": None,
+            "fundamental_score": None,
+            "confidence": None,
+            "reasoning": None,
+            "data_source": "tickertape",
+            "status": "NULL",
+            "error": str(e)
+        })
     except Exception as e:
         logger.error(f"Error in analyze_fundamental: {str(e)}")
         return jsonify(

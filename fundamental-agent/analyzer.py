@@ -64,7 +64,7 @@ def call_groq(prompt: str) -> dict:
 
     client = _get_groq_client()
     response = client.chat.completions.create(
-        model="llama3-8b-8192",
+        model="llama-3.3-70b-versatile",
         messages=[
             {
                 "role": "system",

@@ -89,141 +89,74 @@ def _safe_float(value, default=None):
 
 
 def _extract_pe_ratio(ratios_df: pd.DataFrame) -> float | None:
-    """
-    Extract PE ratio from key ratios DataFrame.
-    Tickertape returns a transposed DataFrame — rows are metric names.
-    """
     if ratios_df is None or ratios_df.empty:
         return None
-
-    pe_candidates = ["P/E", "PE Ratio", "Price to Earnings", "pe", "P/E Ratio"]
-
-    for candidate in pe_candidates:
-        if candidate in ratios_df.index:
-            val = ratios_df.loc[candidate].iloc[0]
-            result = _safe_float(val)
-            if result is not None:
-                logger.debug(f"PE ratio found under key '{candidate}': {result}")
-                return result
-
-    logger.warning(f"PE ratio not found. Available ratio keys: {list(ratios_df.index)}")
-    return None
+    try:
+        # Use ttmPe (trailing 12 month) — most accurate current valuation
+        # Fall back to pe if ttmPe is missing
+        val = ratios_df.loc["ttmPe"].iloc[0] if "ttmPe" in ratios_df.index else None
+        if val is None or pd.isna(val):
+            val = ratios_df.loc["pe"].iloc[0] if "pe" in ratios_df.index else None
+        return _safe_float(val)
+    except Exception as e:
+        logger.warning(f"PE extraction failed: {e}")
+        return None
 
 
 def _extract_profit_margins(ratios_df: pd.DataFrame, income_df: pd.DataFrame) -> float | None:
-    """
-    Extract net profit margin from key ratios.
-    Falls back to computing from income statement if not in ratios.
-    """
-    if ratios_df is not None and not ratios_df.empty:
-        margin_candidates = [
-            "Net Profit Margin", "Profit Margin", "NPM", "Net Margin",
-            "Net Profit Margin %", "PAT Margin"
-        ]
-        for candidate in margin_candidates:
-            if candidate in ratios_df.index:
-                val = ratios_df.loc[candidate].iloc[0]
-                result = _safe_float(val)
-                if result is not None:
-                    # Normalize — Tickertape may return 21.5 instead of 0.215
-                    if result > 1:
-                        result = round(result / 100, 4)
-                    logger.debug(f"Profit margin found under key '{candidate}': {result}")
-                    return result
-
-    # Fallback — compute from income statement
+    # Compute from income statement — incNinc / incTrev
     if income_df is not None and not income_df.empty:
         try:
-            revenue_candidates = ["Revenue", "Total Revenue", "Net Sales", "Net Revenue"]
-            profit_candidates = ["Net Profit", "PAT", "Net Income", "Profit After Tax"]
-
-            revenue = None
-            profit = None
-
-            for col in revenue_candidates:
-                if col in income_df.index:
-                    revenue = _safe_float(income_df.loc[col].iloc[0])
-                    break
-
-            for col in profit_candidates:
-                if col in income_df.index:
-                    profit = _safe_float(income_df.loc[col].iloc[0])
-                    break
-
-            if revenue and profit and revenue != 0:
-                return round(profit / revenue, 4)
+            # Use most recent year — FY2025 is iloc[1], TTM is iloc[2]
+            # Use TTM (index 2) for most current picture
+            row = income_df.iloc[-1]
+            revenue = _safe_float(row.get("incTrev"))
+            net_income = _safe_float(row.get("incNinc"))
+            if revenue and net_income and revenue != 0:
+                return round(net_income / revenue, 4)
         except Exception as e:
-            logger.debug(f"Could not compute margin from income statement: {e}")
-
+            logger.warning(f"Profit margin computation failed: {e}")
     return None
 
 
 def _extract_revenue_growth(income_df: pd.DataFrame) -> float | None:
-    """
-    Compute YoY revenue growth from income statement.
-    Requires at least 2 periods of data.
-    """
     if income_df is None or income_df.empty:
         return None
-
-    revenue_candidates = ["Revenue", "Total Revenue", "Net Sales", "Net Revenue"]
-
-    for candidate in revenue_candidates:
-        if candidate in income_df.index:
-            revenue_row = income_df.loc[candidate]
-            if len(revenue_row) >= 2:
-                current = _safe_float(revenue_row.iloc[0])
-                previous = _safe_float(revenue_row.iloc[1])
-                if current and previous and previous != 0:
-                    growth = round((current - previous) / abs(previous), 4)
-                    logger.debug(f"Revenue growth computed: {growth}")
-                    return growth
-            break
-
-    logger.warning("Could not compute revenue growth — insufficient data")
+    try:
+        # income_df rows: FY2024 (idx 0), FY2025 (idx 1), TTM (idx 2)
+        # Use FY2024 and FY2025 for clean annual YoY growth
+        if len(income_df) >= 2:
+            current = _safe_float(income_df.iloc[1].get("incTrev"))   # FY2025
+            previous = _safe_float(income_df.iloc[0].get("incTrev"))  # FY2024
+            if current and previous and previous != 0:
+                return round((current - previous) / abs(previous), 4)
+    except Exception as e:
+        logger.warning(f"Revenue growth computation failed: {e}")
     return None
 
 
 def _extract_debt_to_equity(ratios_df: pd.DataFrame) -> float | None:
-    """
-    Extract debt to equity ratio from key ratios DataFrame.
-    """
-    if ratios_df is None or ratios_df.empty:
-        return None
-
-    de_candidates = [
-        "Debt to Equity", "D/E Ratio", "Debt/Equity", "DE Ratio",
-        "Total Debt/Equity", "D/E"
-    ]
-
-    for candidate in de_candidates:
-        if candidate in ratios_df.index:
-            val = ratios_df.loc[candidate].iloc[0]
-            result = _safe_float(val)
-            if result is not None:
-                logger.debug(f"D/E ratio found under key '{candidate}': {result}")
-                return result
-
-    logger.warning(f"D/E ratio not found. Available ratio keys: {list(ratios_df.index)}")
+    # Tickertape key ratios do not directly expose D/E in this payload
+    # bps (book value per share) and eps are available
+    # D/E requires balance sheet — not available in this call
+    # Return None — LLM will handle missing D/E gracefully
+    logger.debug("D/E ratio not available in Tickertape key ratios payload")
     return None
 
 
 def _extract_roe(ratios_df: pd.DataFrame) -> float | None:
-    """
-    Extract Return on Equity from key ratios DataFrame.
-    """
     if ratios_df is None or ratios_df.empty:
         return None
-
-    roe_candidates = ["ROE", "Return on Equity", "Return on Equity %"]
-
-    for candidate in roe_candidates:
-        if candidate in ratios_df.index:
-            val = _safe_float(ratios_df.loc[candidate].iloc[0])
+    try:
+        if "roe" in ratios_df.index:
+            val = _safe_float(ratios_df.loc["roe"].iloc[0])
             if val is not None:
-                return val / 100 if val > 1 else val
-
+                # Tickertape returns ROE as percentage (28.9) — normalize to decimal
+                return round(val / 100, 4) if val > 1 else val
+    except Exception as e:
+        logger.warning(f"ROE extraction failed: {e}")
     return None
+
 
 
 # -------------------------------------------------------------------
@@ -331,6 +264,8 @@ def fetch_metrics(ticker: str) -> dict:
             "sector":          None,   # not cleanly exposed by Tickertape
             "industry":        None,
         }
+        if ratios_df is not None and "lastPrice" in ratios_df.index:
+            metrics["current_price"] = _safe_float(ratios_df.loc["lastPrice"].iloc[0])
 
         logger.info(
             f"Final metrics for {clean_ticker}: "
