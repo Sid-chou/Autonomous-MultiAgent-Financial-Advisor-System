@@ -3,9 +3,8 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 
 load_dotenv()
-from analyzer import build_prompt, call_groq
+from analyzer import build_prompt, call_groq, convert_to_score
 from data_fetcher import fetch_metrics, validate_metrics
-from scorer import convert_to_score
 import logging
 
 app = Flask(__name__)
