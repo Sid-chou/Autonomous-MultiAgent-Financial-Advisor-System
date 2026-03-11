@@ -60,3 +60,11 @@ merged_indian_dataset.csv
 
 # Jupyter Notebook Checkpoints
 .ipynb_checkpoints/
+# Virtual Environments
+.venv/
+venv/
+env/
+
+# Python Cache
+__pycache__/
+*.pyc
