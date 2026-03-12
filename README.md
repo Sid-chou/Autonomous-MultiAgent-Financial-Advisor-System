@@ -127,6 +127,7 @@ TICKER_MAPPINGS = {
     "RELIANCE": "Reliance Industries"
 }
 ```
+activate the virtual environment .venv\Scripts\Activate.ps1
 
 All tickers must use the `.NS` suffix when calling the API (e.g. `INFY.NS`).
 
