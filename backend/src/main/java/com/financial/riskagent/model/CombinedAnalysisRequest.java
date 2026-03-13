@@ -5,4 +5,5 @@ import lombok.Data;
 @Data
 public class CombinedAnalysisRequest {
     private String ticker;
+    private UserProfile userProfile;
 }

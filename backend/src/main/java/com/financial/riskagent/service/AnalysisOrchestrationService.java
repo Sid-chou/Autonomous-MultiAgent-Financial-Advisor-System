@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 @Service
 public class AnalysisOrchestrationService {
@@ -17,42 +18,77 @@ public class AnalysisOrchestrationService {
     @Autowired
     private TechnicalService technicalService;
 
-    public CombinedAnalysisResponse analyze(String ticker) {
+    @Autowired
+    private FundamentalService fundamentalService;
 
-        // Fire both agents at the SAME TIME
+    @Autowired
+    private PortfolioService portfolioService;
+
+    @Autowired
+    private RiskManagerService riskManagerService;
+
+    public CombinedAnalysisResponse analyze(String ticker, UserProfile userProfile) {
+
+        // STEP 1 — Fire three agents in parallel
         CompletableFuture<SentimentResponse> sentimentFuture = CompletableFuture
                 .supplyAsync(() -> sentimentService.analyzeSentiment(ticker));
 
         CompletableFuture<TechnicalReport> technicalFuture = CompletableFuture
                 .supplyAsync(() -> technicalService.analyzeTechnical(ticker));
 
-        // Wait for BOTH to complete
-        CompletableFuture.allOf(sentimentFuture, technicalFuture).join();
+        CompletableFuture<FundamentalReport> fundamentalFuture = CompletableFuture
+                .supplyAsync(() -> fundamentalService.analyzeFundamental(ticker));
 
-        // Collect results
+        // Wait for ALL three to complete
+        CompletableFuture.allOf(sentimentFuture, technicalFuture, fundamentalFuture).join();
+
+        // STEP 2 — Collect parallel results
         SentimentResponse sentimentReport = sentimentFuture.join();
         TechnicalReport technicalReport = technicalFuture.join();
+        FundamentalReport fundamentalReport = fundamentalFuture.join();
 
-        // Determine pipeline status
-        String pipelineStatus = determinePipelineStatus(sentimentReport, technicalReport);
+        // STEP 3 — Call Portfolio Manager sequentially (needs all three reports)
+        PortfolioReport portfolioReport = portfolioService.analyzePortfolio(
+                ticker, sentimentReport, technicalReport, fundamentalReport);
 
+        // STEP 4 — Call Risk Manager sequentially (needs all reports + user profile)
+        RiskReport riskReport = riskManagerService.analyzeRisk(
+                ticker, userProfile, sentimentReport, technicalReport, fundamentalReport);
+
+        // STEP 5 — Determine pipeline status across all five agents
+        String pipelineStatus = determinePipelineStatus(
+                sentimentReport, technicalReport, fundamentalReport, portfolioReport, riskReport);
+
+        // STEP 6 — Build and return response
         return CombinedAnalysisResponse.builder()
                 .ticker(ticker)
                 .sentimentReport(sentimentReport)
                 .technicalReport(technicalReport)
+                .fundamentalReport(fundamentalReport)
+                .portfolioReport(portfolioReport)
+                .riskReport(riskReport)
                 .pipelineStatus(pipelineStatus)
                 .timestamp(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
                 .build();
     }
 
-    private String determinePipelineStatus(SentimentResponse sentiment, TechnicalReport technical) {
-        boolean sentimentOk = sentiment != null && "OK".equals(sentiment.getStatus());
-        boolean technicalOk = technical != null && "OK".equals(technical.getStatus());
+    private String determinePipelineStatus(
+            SentimentResponse sentiment,
+            TechnicalReport technical,
+            FundamentalReport fundamental,
+            PortfolioReport portfolio,
+            RiskReport risk) {
 
-        if (sentimentOk && technicalOk)
-            return "OK";
-        if (!sentimentOk && !technicalOk)
-            return "FAILED";
+        long okCount = Stream.of(
+                sentiment != null ? sentiment.getStatus() : null,
+                technical != null ? technical.getStatus() : null,
+                fundamental != null ? fundamental.getStatus() : null,
+                portfolio != null ? portfolio.getStatus() : null,
+                risk != null ? risk.getStatus() : null
+        ).filter(s -> "OK".equals(s)).count();
+
+        if (okCount == 5) return "OK";
+        if (okCount == 0) return "FAILED";
         return "PARTIAL";
     }
 }
