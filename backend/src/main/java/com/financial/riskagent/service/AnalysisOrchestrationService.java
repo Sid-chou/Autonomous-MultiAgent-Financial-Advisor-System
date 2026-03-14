@@ -27,6 +27,9 @@ public class AnalysisOrchestrationService {
     @Autowired
     private RiskManagerService riskManagerService;
 
+    @Autowired
+    private UserLiaisonService userLiaisonService;
+
     public CombinedAnalysisResponse analyze(String ticker, UserProfile userProfile) {
 
         // STEP 1 — Fire three agents in parallel
@@ -55,11 +58,18 @@ public class AnalysisOrchestrationService {
         RiskReport riskReport = riskManagerService.analyzeRisk(
                 ticker, userProfile, sentimentReport, technicalReport, fundamentalReport);
 
-        // STEP 5 — Determine pipeline status across all five agents
+        // STEP 5 — Call User Liaison sequentially (last — needs ALL reports)
+        LiaisonReport liaisonReport = userLiaisonService.analyzeLiaison(
+                ticker, userProfile,
+                sentimentReport, technicalReport, fundamentalReport,
+                portfolioReport, riskReport);
+
+        // STEP 6 — Determine pipeline status across the five analytical agents
+        // User Liaison NULL does NOT count as pipeline failure (it is cosmetic)
         String pipelineStatus = determinePipelineStatus(
                 sentimentReport, technicalReport, fundamentalReport, portfolioReport, riskReport);
 
-        // STEP 6 — Build and return response
+        // STEP 7 — Build and return response
         return CombinedAnalysisResponse.builder()
                 .ticker(ticker)
                 .sentimentReport(sentimentReport)
@@ -67,6 +77,7 @@ public class AnalysisOrchestrationService {
                 .fundamentalReport(fundamentalReport)
                 .portfolioReport(portfolioReport)
                 .riskReport(riskReport)
+                .liaisonReport(liaisonReport)
                 .pipelineStatus(pipelineStatus)
                 .timestamp(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
                 .build();

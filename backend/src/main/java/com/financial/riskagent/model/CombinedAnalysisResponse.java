@@ -17,6 +17,7 @@ public class CombinedAnalysisResponse {
     private FundamentalReport fundamentalReport;
     private PortfolioReport portfolioReport;
     private RiskReport riskReport;
+    private LiaisonReport liaisonReport;
     private String pipelineStatus; // OK, PARTIAL, FAILED
     private String timestamp;
 }
