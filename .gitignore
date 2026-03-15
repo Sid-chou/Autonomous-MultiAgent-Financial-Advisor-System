@@ -68,3 +68,9 @@ env/
 # Python Cache
 __pycache__/
 *.pyc
+
+#random skill 
+.agents\skills\frontend-design\SKILL.md
+.agents\skills\frontend-design\LICENSE.txt
+.agents\skills\frontend-design\README.md
+.agents\skills\frontend-design\skills-lock.json
