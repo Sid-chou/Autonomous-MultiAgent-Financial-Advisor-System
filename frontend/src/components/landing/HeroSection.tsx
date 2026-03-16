@@ -13,64 +13,64 @@ export function HeroSection({ ticker, onTickerChange, onAnalyze, error }: HeroSe
     <main className="relative min-h-screen flex flex-col items-center justify-center px-8 pt-[60px] overflow-hidden">
 
       {/* Gradient mesh background */}
+      {/* Gradient mesh background — Finta style white dome */}
       <div className="absolute inset-0 -z-10" style={{
         background: `
-          radial-gradient(ellipse 75% 60% at 10% 50%, #082F49 0%, transparent 60%),
-          radial-gradient(ellipse 55% 75% at 88% 20%, #0F172A 0%, transparent 55%),
-          radial-gradient(ellipse 65% 50% at 85% 85%, #082F49 0%, transparent 55%),
-          radial-gradient(ellipse 40% 40% at 60% 55%, rgba(125,211,252,0.06) 0%, transparent 50%),
-          #020617
+          radial-gradient(ellipse 80% 65% at 50% -10%, #ffffff 0%, #ffffff 35%, transparent 70%),
+          radial-gradient(ellipse 100% 100% at 50% 0%, #E0F2FE 0%, #E0F2FE 50%, #bfdbfe 100%)
         `
       }} />
 
       {/* Announcement badge */}
       <div className="animate-fade-up delay-100 mb-8 px-4 py-2 rounded-full font-mono text-[11px] tracking-[0.06em] cursor-pointer transition-colors"
         style={{
-          background: "rgba(15, 23, 42, 0.8)",
-          border: "1px solid rgba(125, 211, 252, 0.2)",
-          color: "#7DD3FC",
+          background: "rgba(255,255,255,0.85)",
+          border: "1px solid #CBD5E1",
+          color: "#0F172A",
         }}
-        onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(125,211,252,0.45)")}
-        onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(125,211,252,0.2)")}>
+        onMouseEnter={e => (e.currentTarget.style.borderColor = "#082F49")}
+        onMouseLeave={e => (e.currentTarget.style.borderColor = "#CBD5E1")}>
         NSE markets covered — Nifty 50 fully supported &nbsp;→
       </div>
 
       {/* Headline */}
-      <h1 className="animate-fade-up delay-200 font-display text-center leading-[1.1] tracking-[-0.02em] text-alice mb-5"
-        style={{ fontSize: "clamp(40px, 7vw, 72px)" }}>
+      {/* Headline */}
+      <h1 className="animate-fade-up delay-200 font-display text-center leading-[1.1] tracking-[-0.02em] mb-5"
+        style={{ fontSize: "clamp(40px, 7vw, 72px)", color: "#020617" }}>
         AI stock analysis for
         <br />
-        <em className="text-frozen not-italic">Indian markets.</em>
+        <em className="not-italic" style={{ color: "#082F49" }}>Indian markets.</em>
       </h1>
 
       {/* Decorative dots */}
-      <div className="animate-fade-up delay-200 flex gap-[6px] mb-8">
+      {/* <div className="animate-fade-up delay-200 flex gap-[6px] mb-8">
         {[false, false, true, false, true, false, false, false].map((big, i) => (
           <span key={i} className="rounded-full"
             style={{
               width: big ? "8px" : "6px",
               height: big ? "8px" : "6px",
-              background: big ? "#7DD3FC" : "rgba(125,211,252,0.3)",
+              background: big ? "#082F49" : "rgba(8,47,73,0.25)",
             }} />
         ))}
-      </div>
+      </div> */}
 
       {/* Subheadline */}
       <p className="animate-fade-up delay-300 font-mono text-[13px] tracking-[0.04em] text-center mb-10"
-        style={{ color: "rgba(224,242,254,0.6)", maxWidth: "460px", lineHeight: "1.7" }}>
+        style={{ color: "#64748B", maxWidth: "460px", lineHeight: "1.7" }}>
         Six specialized AI agents. Live market data. Personalized to your risk profile.
       </p>
 
       {/* Demo card */}
       <div className="animate-fade-up delay-400 w-full max-w-[560px] rounded-[18px] p-7"
         style={{
-          background: "rgba(15, 23, 42, 0.65)",
+          background: "rgba(255, 255, 255, 0.85)",
           backdropFilter: "blur(20px)",
-          border: "1px solid rgba(125, 211, 252, 0.18)",
+          border: "1px solid #CBD5E1",
+          boxShadow: "0 4px 32px rgba(8,47,73,0.08)",
         }}>
 
         <p className="font-mono text-[10px] tracking-[0.12em] uppercase mb-2"
-          style={{ color: "rgba(125,211,252,0.6)" }}>
+          style={{ color: "#64748B" }}>
           Enter NSE Ticker
         </p>
 
@@ -84,19 +84,19 @@ export function HeroSection({ ticker, onTickerChange, onAnalyze, error }: HeroSe
         {/* Sample output preview */}
         <div className="mt-4 p-4 rounded-[10px]"
           style={{
-            background: "rgba(8, 47, 73, 0.4)",
-            border: "1px solid rgba(125, 211, 252, 0.1)",
+            background: "#F0F9FF",
+            border: "1px solid #BAE6FD",
           }}>
           <p className="font-mono text-[10px] tracking-[0.1em] uppercase mb-2"
-            style={{ color: "rgba(125,211,252,0.5)" }}>
+            style={{ color: "#64748B" }}>
             Sample Output
           </p>
           <p className="font-display italic text-[28px] font-light mb-1"
-            style={{ color: "#7DD3FC" }}>
+            style={{ color: "#082F49" }}>
             HOLD
           </p>
           <p className="font-display italic text-[12px] leading-relaxed"
-            style={{ color: "rgba(224,242,254,0.55)" }}>
+            style={{ color: "#475569" }}>
             &quot;Infosys is trading below fair value. Waiting for price momentum to confirm before entering.&quot;
           </p>
         </div>
@@ -106,17 +106,17 @@ export function HeroSection({ ticker, onTickerChange, onAnalyze, error }: HeroSe
           <button
             onClick={onAnalyze}
             className="flex-1 h-10 font-mono text-[11px] tracking-[0.08em] uppercase rounded transition-opacity hover:opacity-85"
-            style={{ background: "#7DD3FC", color: "#020617" }}>
+            style={{ background: "#082F49", color: "#ffffff" }}>
             Run Live Analysis
           </button>
           <button
             className="flex-1 h-10 font-mono text-[11px] tracking-[0.08em] uppercase rounded transition-colors"
             style={{
               background: "transparent",
-              color: "#7DD3FC",
-              border: "1px solid rgba(125,211,252,0.2)",
+              color: "#082F49",
+              border: "1px solid #CBD5E1",
             }}
-            onMouseEnter={e => (e.currentTarget.style.background = "rgba(125,211,252,0.06)")}
+            onMouseEnter={e => (e.currentTarget.style.background = "#F0F9FF")}
             onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
             Learn More
           </button>
@@ -126,13 +126,13 @@ export function HeroSection({ ticker, onTickerChange, onAnalyze, error }: HeroSe
       {/* Scroll hint */}
       <div className="animate-fade-up delay-500 mt-8 flex flex-col items-center gap-1">
         <span className="font-mono text-[10px] tracking-[0.15em] uppercase"
-          style={{ color: "rgba(125,211,252,0.3)" }}>Scroll</span>
-        <span style={{ color: "rgba(125,211,252,0.3)", fontSize: "14px" }}>↓</span>
+          style={{ color: "rgba(8,47,73,0.3)" }}>Scroll</span>
+        <span style={{ color: "rgba(8,47,73,0.3)", fontSize: "14px" }}>↓</span>
       </div>
 
       {/* Disclaimer */}
       <p className="absolute bottom-5 font-mono text-[10px] tracking-[0.04em]"
-        style={{ color: "rgba(125,211,252,0.25)" }}>
+        style={{ color: "rgba(8,47,73,0.3)" }}>
         For educational purposes only. Not financial advice.
       </p>
     </main>
