@@ -14,29 +14,29 @@ export function Navbar({ onProfileClick, profileSet }: NavbarProps) {
       <div className="w-full max-w-[1100px] mx-auto px-8 flex items-center justify-between">
 
         {/* Logo */}
-        <span className="font-display text-[20px] tracking-tight"
+        <span className="font-display font-medium text-[22px] tracking-tight"
           style={{ color: "#0F172A" }}>
           FinAdvisor
         </span>
 
         {/* Right side — all nav items here */}
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-4">
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center gap-8">
-            <span className="font-sans text-[15px] font-medium cursor-pointer transition-colors"
+            <span className="font-sans text-[14px] font-bold cursor-pointer transition-colors"
               style={{ color: "#0F172A" }}
               onMouseEnter={e => (e.currentTarget.style.color = "#082F49")}
               onMouseLeave={e => (e.currentTarget.style.color = "#0F172A")}>
               Features
             </span>
-            <span className="font-sans text-[15px] font-medium cursor-pointer transition-colors"
+            <span className="font-sans text-[14px] font-bold cursor-pointer transition-colors"
               style={{ color: "#0F172A" }}
               onMouseEnter={e => (e.currentTarget.style.color = "#082F49")}
               onMouseLeave={e => (e.currentTarget.style.color = "#0F172A")}>
               How it works
             </span>
-            <span className="font-sans text-[15px] font-medium cursor-pointer transition-colors"
+            <span className="font-sans text-[14px] font-bold cursor-pointer transition-colors"
               style={{ color: "#0F172A" }}
               onMouseEnter={e => (e.currentTarget.style.color = "#082F49")}
               onMouseLeave={e => (e.currentTarget.style.color = "#0F172A")}>
@@ -67,13 +67,13 @@ export function Navbar({ onProfileClick, profileSet }: NavbarProps) {
             </button>
 
             {/* CTA */}
-            <button
+            {/* <button
               className="font-sans text-[14px] font-medium px-5 py-2 rounded-[8px] transition-colors"
               style={{ background: "#082F49", color: "#ffffff" }}
               onMouseEnter={e => (e.currentTarget.style.background = "#0F172A")}
               onMouseLeave={e => (e.currentTarget.style.background = "#082F49")}>
               Get Started
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

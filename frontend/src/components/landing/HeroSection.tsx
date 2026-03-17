@@ -10,7 +10,7 @@ interface HeroSectionProps {
 
 export function HeroSection({ ticker, onTickerChange, onAnalyze, error }: HeroSectionProps) {
   return (
-    <main className="relative min-h-screen flex flex-col items-center justify-center px-8 pt-[60px] overflow-hidden">
+    <main className="relative min-h-screen flex flex-col items-center justify-center px-8 pt-[100px] overflow-hidden">
 
       {/* Gradient mesh background */}
       {/* Gradient mesh background — Finta style white dome */}
@@ -22,7 +22,7 @@ export function HeroSection({ ticker, onTickerChange, onAnalyze, error }: HeroSe
       }} />
 
       {/* Announcement badge */}
-      <div className="animate-fade-up delay-100 mb-8 px-4 py-2 rounded-full font-mono text-[11px] tracking-[0.06em] cursor-pointer transition-colors"
+      <div className="animate-fade-up delay-100 mb-8 px-4 py- rounded-full font-mono text-[11px] tracking-[0.06em] cursor-pointer transition-colors"
         style={{
           background: "rgba(255,255,255,0.85)",
           border: "1px solid #CBD5E1",
@@ -35,11 +35,10 @@ export function HeroSection({ ticker, onTickerChange, onAnalyze, error }: HeroSe
 
       {/* Headline */}
       {/* Headline */}
-      <h1 className="animate-fade-up delay-200 font-display text-center leading-[1.1] tracking-[-0.02em] mb-5"
-        style={{ fontSize: "clamp(40px, 7vw, 72px)", color: "#020617" }}>
+      <h1 className="animate-fade-up delay-200 font-medium mt-10 text-7xl text-black tracking-tighter text-center">
         AI stock analysis for
         <br />
-        <em className="not-italic" style={{ color: "#082F49" }}>Indian markets.</em>
+        <em className="not-italic">Indian markets.</em>
       </h1>
 
       {/* Decorative dots */}
