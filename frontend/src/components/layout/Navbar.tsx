@@ -7,7 +7,7 @@ interface NavbarProps {
 
 export function Navbar({ onProfileClick, profileSet }: NavbarProps) {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 h-[64px] flex items-center justify-center backdrop -blur-2xl bg-white/90 border-b border-white/60"
+    <nav className="fixed top-0 left-0 right-0 z-50 h-[64px] flex items-center justify-center max-w-3xl mx-auto backdrop -blur-2xl bg-white/90 border-b border-white/100"
       style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
 
       {/* Centered container — matches Finta's contained width */}
