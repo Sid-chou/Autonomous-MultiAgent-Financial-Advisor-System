@@ -7,36 +7,54 @@ interface NavbarProps {
 
 export function Navbar({ onProfileClick, profileSet }: NavbarProps) {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 h-[64px] flex items-center justify-center"
-      style={{ background: "transparent" }}>
+    <nav className="fixed top-0 left-0 right-0 z-50 h-[64px] flex items-center justify-center backdrop -blur-2xl bg-white/90 border-b border-white/60"
+      style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
 
       {/* Centered container — matches Finta's contained width */}
       <div className="w-full max-w-[1100px] mx-auto px-8 flex items-center justify-between">
 
-        {/* Logo */}
-        <span className="font-display font-medium text-[22px] tracking-tight"
-          style={{ color: "#0F172A" }}>
-          FinAdvisor
-        </span>
+        {/* Full Logo — icon + wordmark */}
+        <div className="flex items-center gap-2 cursor-pointer select-none">
+          {/* Icon badge */}
+          <div
+            className="w-8 h-8 rounded-lg flex items-center justify-center"
+            style={{ background: "#EFF6FF", border: "1px solid #BFDBFE" }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M19 6.873a2 2 0 0 1 1 1.747v6.536a2 2 0 0 1 -1.029 1.748l-6 3.833a2 2 0 0 1 -1.942 0l-6 -3.833a2 2 0 0 1 -1.029 -1.747v-6.537a2 2 0 0 1 1.029 -1.748l6 -3.572a2.056 2.056 0 0 1 2 0l6 3.573z" />
+              <path d="M9 15v-4" />
+              <path d="M12 15v-7" />
+              <path d="M15 15v-2" />
+            </svg>
+          </div>
+          {/* Wordmark */}
+          <span
+            className="text-[18px] font-semibold tracking-tight"
+            style={{ color: "#0F172A", letterSpacing: "-0.02em" }}
+          >
+            Fin<span style={{ color: "#2563EB" }}>Advisor</span>
+          </span>
+        </div>
 
         {/* Right side — all nav items here */}
         <div className="flex items-center gap-4">
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center gap-8">
-            <span className="font-sans text-[14px] font-bold cursor-pointer transition-colors"
+            <span className="text-[14px] font-semibold  cursor-pointer transition-colors" 
               style={{ color: "#0F172A" }}
               onMouseEnter={e => (e.currentTarget.style.color = "#082F49")}
               onMouseLeave={e => (e.currentTarget.style.color = "#0F172A")}>
               Features
             </span>
-            <span className="font-sans text-[14px] font-bold cursor-pointer transition-colors"
+            {/* <span className="text-[14px] font-semibold cursor-pointer font-weight:400 transition-colors"
               style={{ color: "#0F172A" }}
               onMouseEnter={e => (e.currentTarget.style.color = "#082F49")}
               onMouseLeave={e => (e.currentTarget.style.color = "#0F172A")}>
               How it works
-            </span>
-            <span className="font-sans text-[14px] font-bold cursor-pointer transition-colors"
+            </span> */}
+            <span className="text-[14px] font-semibold cursor-pointer transition-colors"
               style={{ color: "#0F172A" }}
               onMouseEnter={e => (e.currentTarget.style.color = "#082F49")}
               onMouseLeave={e => (e.currentTarget.style.color = "#0F172A")}>

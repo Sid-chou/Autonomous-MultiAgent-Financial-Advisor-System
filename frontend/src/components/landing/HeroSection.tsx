@@ -49,16 +49,7 @@ export function HeroSection({ ticker, onTickerChange, onAnalyze, error }: HeroSe
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-center px-8 pt-[100px] overflow-hidden">
 
-      {/* Gradient mesh background — Finta style white dome */}
-      <div
-        className="absolute inset-0 -z-10"
-        style={{
-          background: `
-            radial-gradient(ellipse 80% 65% at 50% -10%, #ffffff 0%, #ffffff 35%, transparent 70%),
-            radial-gradient(ellipse 100% 100% at 50% 0%, #E0F2FE 0%, #E0F2FE 50%, #bfdbfe 100%)
-          `,
-        }}
-      />
+      {/* Global gradient moved to page.tsx */}
 
       {/* Announcement badge */}
       <div
@@ -204,9 +195,9 @@ export function HeroSection({ ticker, onTickerChange, onAnalyze, error }: HeroSe
             background: "linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)",
             color: "#ffffff",
             fontSize: "12px",
-            fontWeight: 700,
+            fontWeight: 400,
             letterSpacing: "0.08em",
-            fontFamily: "monospace",
+            fontFamily: "Zodiak",
             boxShadow: "0 4px 16px rgba(37,99,235,0.30)",
             transition: "transform 0.15s ease, box-shadow 0.15s ease",
           }}

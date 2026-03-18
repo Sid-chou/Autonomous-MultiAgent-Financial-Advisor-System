@@ -22,6 +22,17 @@ export default function Home() {
 
   return (
     <>
+      {/* Global Gradient Background */}
+      <div
+        className="fixed inset-0 -z-50"
+        style={{
+          background: `
+            radial-gradient(ellipse 80% 65% at 50% -10%, #ffffff 0%, #ffffff 35%, transparent 70%),
+            radial-gradient(ellipse 100% 100% at 50% 0%, #E0F2FE 0%, #E0F2FE 50%, #bfdbfe 100%)
+          `,
+        }}
+      />
+
       <Navbar
         onProfileClick={() => setProfileOpen(true)}
         profileSet={isProfileSet}
