@@ -5,11 +5,13 @@ Main application for analyzing Indian stock market sentiment
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import feedparser
 import config
+from config import get_all_sources
 
 # Import modules
 from models.analyzer_factory import analyzer, get_model_info
-from collectors.news_collector import NewsCollector
 from collectors.reddit_collector import RedditCollector
 from cache.cache_manager import cache
 
@@ -18,8 +20,57 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for Spring Boot integration
 
 # Initialize collectors
-news_collector = NewsCollector()
 reddit_collector = RedditCollector()
+
+
+# ─── Concurrent RSS Fetching ─────────────────────────────────────────────────
+
+def fetch_single_feed(source, search_terms):
+    """Fetch one RSS feed and return matching articles."""
+    articles = []
+    try:
+        feed = feedparser.parse(
+            source["url"],
+            request_headers={"User-Agent": "Mozilla/5.0"}
+        )
+        for entry in feed.entries:
+            title   = entry.get("title", "")
+            summary = entry.get("summary", "")
+            text    = f"{title} {summary}".lower()
+            if any(term.lower() in text for term in search_terms):
+                articles.append({
+                    "title":          title,
+                    "summary":        summary,
+                    "source":         source["name"],
+                    "sentiment_text": f"{title}. {summary}",
+                    "url":            entry.get("link", ""),
+                    "priority":       source["priority"],
+                })
+        print(f"DEBUG {source['name']} returned {len(articles)} articles")
+    except Exception as e:
+        print(f"DEBUG {source['name']} failed: {e}")
+    return articles
+
+
+def fetch_all_feeds_concurrent(search_terms):
+    """Fire all RSS feeds simultaneously. Hard cap: 8 seconds total."""
+    sources     = get_all_sources()
+    all_articles = []
+    with ThreadPoolExecutor(max_workers=15) as executor:
+        futures = {
+            executor.submit(fetch_single_feed, source, search_terms): source
+            for source in sources
+        }
+        for future in as_completed(futures, timeout=8):
+            try:
+                all_articles.extend(future.result())
+            except Exception as e:
+                print(f"DEBUG feed future failed: {e}")
+    # Higher priority (lower number) articles score first
+    return sorted(all_articles, key=lambda x: x.get("priority", 99))
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 
 print("=" * 50)
 print("Sentiment Analysis Service Starting...")
@@ -84,14 +135,23 @@ def analyze_sentiment():
         print(f"Analyzing sentiment for: {ticker}")
         print(f"{'='*50}")
         
-        # Get company name
         # Get company name — strip exchange suffix before lookup
         ticker_clean = ticker.replace('.NS', '').replace('.BO', '').replace('.BSE', '')
         company_name = config.TICKER_MAPPINGS.get(ticker_clean, ticker_clean)
-        
-        # Collect news articles
-        print("Collecting news articles...")
-        news_articles = news_collector.collect_news(ticker_clean, company_name)
+
+        # Build search terms with variations; remove duplicates, preserve order
+        search_terms = [
+            ticker_clean,
+            ticker_clean.lower(),
+            company_name,
+            company_name + " Limited",
+            company_name + " Ltd",
+        ]
+        search_terms = list(dict.fromkeys(search_terms))
+
+        # Collect news articles concurrently across all sources
+        print("Collecting news articles (concurrent)...")
+        news_articles = fetch_all_feeds_concurrent(search_terms)
         print(f"Found {len(news_articles)} news articles")
         
         # Collect Reddit posts (if enabled)
@@ -102,14 +162,20 @@ def analyze_sentiment():
             print(f"Found {len(reddit_posts)} Reddit posts")
         
         # Check if we have any data
-        if len(news_articles) == 0 and len(reddit_posts) == 0:
+        article_count = len(news_articles) + len(reddit_posts)
+        if article_count == 0:
             return jsonify({
-                "sentiment_score": 0.0,
-                "confidence": 0.0,
-                "label": "neutral",
-                "status": "OK",
-                "error": "No recent news or social media data found"
-            })
+                "ticker":          ticker,
+                "sentiment_score": None,
+                "confidence":      None,
+                "label":           None,
+                "article_count":   0,
+                "status":          "NULL",
+                "error":           "No articles found for this ticker across all sources"
+            }), 200
+            # NOTE: status NULL (not 4xx) so Spring Boot graceful degradation
+            # handles this correctly — Portfolio Manager redistributes
+            # sentiment's 40% weight to Technical and Fundamental agents.
         
         # Analyze news sentiments
         news_sentiments = []

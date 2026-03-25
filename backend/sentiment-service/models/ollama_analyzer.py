@@ -1,3 +1,8 @@
+# THIS FILE IS CURRENTLY DISABLED
+# Ollama is not used in the active pipeline.
+# FinBERT (models/finbert_indian_best/) is the active model.
+# This file is preserved for future reference only.
+
 """
 Ollama-based Sentiment Analyzer
 Uses the fine-tuned financial sentiment model via Ollama

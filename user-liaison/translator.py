@@ -8,7 +8,11 @@ import json
 import logging
 import os
 
+from dotenv import load_dotenv
 from groq import Groq
+
+# Load environment variables before initializing client
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
@@ -26,6 +30,8 @@ WARNING_TRANSLATIONS = {
 
 def _translate_warnings(warnings):
     """Map internal warning strings to plain-English versions."""
+    if not warnings:
+        return []
     translated = []
     for w in warnings:
         matched = False

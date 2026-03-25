@@ -1,37 +1,4 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from rules import run_all_rules
-from validator import validate_request
-
-app = Flask(__name__)
-CORS(app)
-
-@app.route('/health', methods=['GET'])
-def health():
-    return jsonify({
-        "status": "healthy",
-        "service": "risk-manager",
-        "port": 5003,
-        "type": "deterministic-rule-engine"
-    })
-
-@app.route('/api/v1/analyze-risk', methods=['POST'])
-def analyze_risk():
-    try:
-        data = request.get_json()
-
-        # Validate request
-        error = validate_request(data)
-        if error:
-            return jsonify({"error": error}), 400
-
-        ticker = data["ticker"]
-        user_profile = data["user_profile"]
-        agent_reports = data["agent_reports"]
-
-        # Run all rules
-        result = run_all_rules(ticker, user_profile, agent_reports)
-
+a
         return jsonify(result)
 
     except Exception as e:

@@ -3,59 +3,36 @@ Analyzer Factory
 Selects the appropriate sentiment analyzer based on configuration
 """
 import config
-from models.ollama_analyzer import ollama_analyzer
+# from models.ollama_analyzer import ollama_analyzer  # DISABLED — see note below
 from models.sentiment_analyzer import finbert_analyzer
+
+# Ollama disabled — FinBERT fine-tuned on Indian financial headlines
+# is the primary model for this agent.
+# Model path: models/finbert_indian_best/
+# Accuracy: 77% on validation set
+# Re-enable Ollama only if FinBERT path is unavailable (future fallback)
 
 
 def get_analyzer():
     """
-    Get the appropriate sentiment analyzer based on configuration
-    
-    Returns:
-        Analyzer instance (OllamaAnalyzer or FinBERTAnalyzer)
+    Returns the active sentiment analyzer.
+    FinBERT is unconditionally used — Ollama is disabled.
     """
-    # Try to use fine-tuned model if enabled
-    if config.USE_FINETUNED_MODEL and ollama_analyzer.is_available():
-        print("Using fine-tuned model via Ollama")
-        return ollama_analyzer
-    
-    # Fallback to FinBERT
-    if config.FALLBACK_TO_FINBERT:
-        print("Using FinBERT (fallback model)")
-        return finbert_analyzer
-    
-    # No analyzer available
-    raise Exception("No sentiment analyzer available. Please enable Ollama or FinBERT fallback.")
+    print("Using FinBERT (models/finbert_indian_best/) — primary model")
+    return finbert_analyzer
 
 
 def get_model_info():
     """
-    Get information about the currently active model
-    
-    Returns:
-        dict: Model information
+    Get information about the currently active model.
     """
-    if config.USE_FINETUNED_MODEL and ollama_analyzer.is_available():
-        return {
-            "active_model": "fine-tuned",
-            "model_name": config.OLLAMA_MODEL_NAME,
-            "provider": "Ollama",
-            "api_url": config.OLLAMA_API_URL,
-            "fallback_available": config.FALLBACK_TO_FINBERT
-        }
-    elif config.FALLBACK_TO_FINBERT:
-        return {
-            "active_model": "finbert",
-            "model_name": config.MODEL_NAME,
-            "provider": "HuggingFace Transformers",
-            "api_url": "local",
-            "fallback_available": False
-        }
-    else:
-        return {
-            "active_model": "none",
-            "error": "No analyzer available"
-        }
+    return {
+        "active_model": "finbert",
+        "model_name": config.MODEL_NAME,
+        "provider": "HuggingFace Transformers",
+        "api_url": "local",
+        "fallback_available": False
+    }
 
 
 # Initialize the analyzer

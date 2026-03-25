@@ -21,29 +21,49 @@ MAX_NEWS_ARTICLES = 30
 MAX_REDDIT_POSTS = 30
 REQUEST_TIMEOUT = 10  # seconds
 
-# News Sources (RSS Feeds - No Auth Required)
-NEWS_SOURCES = [
-    {
-        "name": "Economic Times",
-        "url": "https://economictimes.indiatimes.com/rssfeedsdefault.cms",
-        "weight": 0.30
-    },
-    {
-        "name": "Financial Express",
-        "url": "https://www.financialexpress.com/feed/",
-        "weight": 0.25
-    },
-    {
-        "name": "Hindu Business Line",
-        "url": "https://www.thehindubusinessline.com/feeder/default.rss",
-        "weight": 0.25
-    },
-    {
-        "name": "LiveMint",
-        "url": "https://www.livemint.com/rss/news",
-        "weight": 0.20
-    }
-]
+# News Sources — priority-grouped RSS feeds (finance-specific, no auth required)
+# Priority 1 = preferred, 2 = fallback, 3 = last resort
+SOURCE_GROUPS = {
+    "market_news": [
+        {"name": "ET Markets",   "url": "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms",        "priority": 1},
+        {"name": "ET Stocks",    "url": "https://economictimes.indiatimes.com/markets/stocks/rssfeeds/2146842.cms",    "priority": 1},
+        {"name": "ET Economy",   "url": "https://economictimes.indiatimes.com/economy/rssfeeds/1373380680.cms",        "priority": 1},
+        {"name": "Business Standard Markets", "url": "https://www.business-standard.com/rss/markets-106.rss",          "priority": 2},
+        {"name": "LiveMint Markets",          "url": "https://www.livemint.com/rss/markets",                           "priority": 2},
+        {"name": "Moneycontrol",              "url": "https://www.moneycontrol.com/rss/latestnews.xml",                "priority": 3},
+    ],
+    "stocks_specific": [
+        {"name": "MC Buzzing Stocks",    "url": "https://www.moneycontrol.com/rss/buzzingstocks.xml",   "priority": 1},
+        {"name": "MC Results",           "url": "https://www.moneycontrol.com/rss/results.xml",         "priority": 1},
+        {"name": "Financial Express",    "url": "https://www.financialexpress.com/market/feed/",         "priority": 2},
+        {"name": "BusinessLine Markets", "url": "https://www.thehindubusinessline.com/markets/?service=rss", "priority": 2},
+    ],
+    "economy_macro": [
+        {"name": "LiveMint Money",       "url": "https://www.livemint.com/rss/money",                   "priority": 1},
+        {"name": "ET Wealth",            "url": "https://economictimes.indiatimes.com/wealth/rssfeeds/837555174.cms", "priority": 1},
+        {"name": "Business Standard Economy", "url": "https://www.business-standard.com/rss/economy-policy-102.rss", "priority": 2},
+    ],
+    "negative_signals": [
+        # Structurally negative sources — earnings misses, enforcement orders,
+        # debt defaults, rating downgrades. Directly improves Negative class detection.
+        {"name": "MC Results",    "url": "https://www.moneycontrol.com/rss/results.xml",                "priority": 1},
+        {"name": "BusinessLine",  "url": "https://www.thehindubusinessline.com/markets/?service=rss",   "priority": 1},
+        {"name": "BS Markets",    "url": "https://www.business-standard.com/rss/markets-106.rss",       "priority": 1},
+    ],
+}
+
+
+def get_all_sources():
+    """Flat list of all unique sources for the live agent to consume, sorted by priority."""
+    seen_urls = set()
+    all_sources = []
+    for group in SOURCE_GROUPS.values():
+        for source in group:
+            if source["url"] not in seen_urls:
+                seen_urls.add(source["url"])
+                all_sources.append(source)
+    # Highest priority (lowest number) feeds processed first
+    return sorted(all_sources, key=lambda x: x["priority"])
 
 # Reddit Configuration (Optional - requires API credentials)
 REDDIT_ENABLED = os.getenv('REDDIT_ENABLED', 'false').lower() == 'true'
