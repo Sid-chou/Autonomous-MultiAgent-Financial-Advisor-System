@@ -39,3 +39,11 @@ The new frontend source (`src/`) was meticulously broken down into domain-driven
 
 ## Summary
 The frontend has evolved from a simple proof-of-concept into a **production-ready, strongly-typed Next.js application** that not only visualizes complex multi-agent reasoning clearly but does so with a highly polished, proprietary user interface. 
+
+## 5. Backend: Sentiment Agent Overhaul (Recent Integrations)
+*Although this document primarily tracks frontend changes, the following critical backend updates were configured to directly impact the data the frontend consumes from the Sentiment Agent:*
+- **FinBERT Model Enforcement**: Disabled the Ollama integration unconditionally within the `analyzer_factory.py`, establishing the locally fine-tuned Indian FinBERT (`models/finbert_indian_best/`) as the sole and default sentiment analyzer.
+- **Advanced RSS Architecture**: Replaced the basic flat list of news feeds in `config.py` with `SOURCE_GROUPS`—a heavily expanded, 14-source dictionary utilizing fallbacks (Priority 1, 2, 3) across market news, macroeconomic news, and structurally negative sources (like earnings misses).
+- **Concurrent Threading**: Refactored `app.py` to strip out sequential fetching in favor of a `ThreadPoolExecutor`. Now, all 14 RSS endpoints are queried concurrently within a restricted 8-second hard cap, significantly speeding up the frontend response time.
+- **Search Robustness**: Injected expanded search aliases to better match company names in raw RSS text (e.g., matching "Wipro", "wipro", "WIPRO", "Wipro Limited", "Wipro Ltd").
+- **Graceful Null Handling**: Addressed a massive flaw where a 0-article query would feed a fake "0.0 Neutral" score into the pipeline. It now correctly returns a `NULL` status with no scores, allowing the Portfolio Manager to redistribute its weight to the Technical and Fundamental agents dynamically.
