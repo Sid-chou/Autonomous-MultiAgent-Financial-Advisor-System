@@ -11,6 +11,8 @@ export interface TechnicalReport {
   macd_signal: string | null;
   regime_flag: number | null;
   regime_label: string | null;
+  trend: string | null;
+  bollinger_position: string | null;
   atr_zscore: number | null;
   technical_score: number | null;
   status: "OK" | "NULL";
