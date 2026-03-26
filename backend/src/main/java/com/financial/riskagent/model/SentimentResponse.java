@@ -10,6 +10,7 @@ public class SentimentResponse {
     private Double positiveScore;
     private Double negativeScore;
     private Double neutralScore;
+    @com.fasterxml.jackson.annotation.JsonProperty("confidence")
     private Double confidenceScore;
     private Integer newsCount;
     private Integer socialCount;
