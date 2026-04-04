@@ -8,11 +8,20 @@ const PLACEHOLDERS = ["INFY", "TCS", "ZOMATO", "RELIANCE", "HDFC", "WIPRO"];
 interface HeroSectionProps {
   ticker: string;
   onTickerChange: (v: string) => void;
+  budget: number;
+  onBudgetChange: (b: number) => void;
+  riskLevel: string;
+  onRiskLevelChange: (r: string) => void;
   onAnalyze: () => void;
   error: string | null;
 }
 
-export function HeroSection({ ticker, onTickerChange, onAnalyze, error }: HeroSectionProps) {
+export function HeroSection({
+  ticker, onTickerChange,
+  budget, onBudgetChange,
+  riskLevel, onRiskLevelChange,
+  onAnalyze, error
+}: HeroSectionProps) {
   /* ── animated placeholder state ── */
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const [displayed, setDisplayed] = useState("");
@@ -179,6 +188,47 @@ export function HeroSection({ ticker, onTickerChange, onAnalyze, error }: HeroSe
             {error}
           </p>
         )}
+
+        {/* ── Risk Profile Inputs ── */}
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full mt-2 mb-4">
+          {/* Budget Input */}
+          <div
+            className="flex-1 flex items-center bg-white/60 backdrop-blur-md rounded-full px-4 h-[44px]"
+            style={{ border: "1px solid rgba(255,255,255,0.4)", boxShadow: "0 2px 10px rgba(8,47,73,0.05)" }}
+          >
+            <span className="text-[#64748B] text-sm font-medium mr-2">₹</span>
+            <input
+              type="number"
+              value={budget || ""}
+              onChange={(e) => onBudgetChange(Number(e.target.value))}
+              placeholder="100000"
+              className="flex-1 bg-transparent border-none outline-none text-[#0F172A] text-sm"
+              style={{ fontFamily: "'DM Mono', monospace" }}
+            />
+            <span className="text-[#94A3B8] text-xs font-medium ml-2 uppercase tracking-wider">Budget</span>
+          </div>
+
+          {/* Risk Level Selector */}
+          <div
+            className="flex-1 flex items-center bg-white/60 backdrop-blur-md rounded-full p-1 h-[44px]"
+            style={{ border: "1px solid rgba(255,255,255,0.4)", boxShadow: "0 2px 10px rgba(8,47,73,0.05)" }}
+          >
+            {["Conservative", "Moderate", "Aggressive"].map((level) => (
+              <button
+                key={level}
+                onClick={() => onRiskLevelChange(level)}
+                className={`flex-1 flex items-center justify-center rounded-full h-full text-xs font-medium transition-all ${
+                  riskLevel === level
+                    ? "bg-[#0F172A] text-white shadow-md"
+                    : "text-[#64748B] hover:text-[#0F172A] hover:bg-white/40"
+                }`}
+                style={{ fontFamily: "Inter, sans-serif" }}
+              >
+                {level}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* ── Analyse Button ── */}
         <button

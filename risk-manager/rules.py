@@ -2,14 +2,33 @@ def run_all_rules(ticker, user_profile, agent_reports):
     rules_checked = []
     warnings = []
 
-    total_budget = user_profile["total_budget"]
-    cash_available = user_profile["cash_available"]
-    max_trade_size = user_profile["max_trade_size"]
-    daily_loss_limit = user_profile["daily_loss_limit"]
-    max_exposure = user_profile["max_exposure_per_stock"]
-    current_daily_loss = user_profile.get("current_daily_loss", 0.0)
-    current_exposure = user_profile.get("current_exposure", {}).get(ticker, 0.0)
-    regime_flag = agent_reports["technical_report"].get("regime_flag", 0)
+    total_budget = user_profile.get("total_budget", 100000)
+    cash_available = user_profile.get("cash_available", total_budget)
+    risk_level = str(user_profile.get("risk_level", "Moderate")).capitalize()
+
+    if risk_level == "Aggressive":
+        default_max_trade_size = 0.15
+        default_daily_loss = 0.05
+        default_max_exposure = 0.30
+    elif risk_level == "Conservative":
+        default_max_trade_size = 0.05
+        default_daily_loss = 0.01
+        default_max_exposure = 0.10
+    else:  # Moderate
+        default_max_trade_size = 0.10
+        default_daily_loss = 0.03
+        default_max_exposure = 0.20
+
+    max_trade_size = float(user_profile.get("max_trade_size") or default_max_trade_size)
+    daily_loss_limit = float(user_profile.get("daily_loss_limit") or default_daily_loss)
+    max_exposure = float(user_profile.get("max_exposure_per_stock") or default_max_exposure)
+
+    current_daily_loss = float(user_profile.get("current_daily_loss") or 0.0)
+    current_exposure_dict = user_profile.get("current_exposure") or {}
+    current_exposure = float(current_exposure_dict.get(ticker, 0.0))
+    
+    tech_report = agent_reports.get("technical_report") or {}
+    regime_flag = tech_report.get("regime_flag", 0)
 
     proposed_size = max_trade_size
     proposed_amount = proposed_size * total_budget

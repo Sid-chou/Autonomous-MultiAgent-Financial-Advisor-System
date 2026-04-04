@@ -21,9 +21,9 @@ export const SUPPORTED_TICKERS = [
 export const DEFAULT_PROFILE: UserProfile = {
   totalBudget: 100000,
   cashAvailable: 100000,
-  maxTradeSize: 0.10,
-  dailyLossLimit: 0.05,
-  maxExposurePerStock: 0.15,
+  maxTradeSize: 0,
+  dailyLossLimit: 0,
+  maxExposurePerStock: 0,
   riskLevel: "moderate",
   currentDailyLoss: 0.0,
   currentExposure: {},

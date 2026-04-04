@@ -10,9 +10,7 @@ def validate_request(data):
 
     profile = data["user_profile"]
     required_profile_fields = [
-        "total_budget", "cash_available", "max_trade_size",
-        "daily_loss_limit", "max_exposure_per_stock",
-        "current_daily_loss", "risk_level"
+        "total_budget", "risk_level"
     ]
     for field in required_profile_fields:
         if field not in profile:

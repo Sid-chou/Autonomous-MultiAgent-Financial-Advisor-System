@@ -14,10 +14,18 @@ export default function Home() {
   const { profile, saveProfile, isProfileSet }                  = useProfile();
   const [profileOpen, setProfileOpen] = useState(false);
   const [ticker, setTicker]           = useState("");
+  const [budget, setBudget]           = useState<number>(100000);
+  const [riskLevel, setRiskLevel]     = useState<string>("Moderate");
 
   const handleAnalyze = () => {
     if (!ticker.trim()) return;
-    analyze(ticker, profile);
+    const combinedProfile = {
+      ...profile,
+      totalBudget: budget,
+      cashAvailable: budget,
+      riskLevel: riskLevel,
+    };
+    analyze(ticker, combinedProfile);
   };
 
   return (
@@ -43,6 +51,10 @@ export default function Home() {
           <HeroSection
             ticker={ticker}
             onTickerChange={setTicker}
+            budget={budget}
+            onBudgetChange={setBudget}
+            riskLevel={riskLevel}
+            onRiskLevelChange={setRiskLevel}
             onAnalyze={handleAnalyze}
             error={error}
           />

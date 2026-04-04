@@ -95,7 +95,7 @@ export interface UserProfile {
   maxTradeSize: number;
   dailyLossLimit: number;
   maxExposurePerStock: number;
-  riskLevel: "low" | "moderate" | "high";
+  riskLevel: string;
   currentDailyLoss: number;
   currentExposure: Record<string, number>;
 }
