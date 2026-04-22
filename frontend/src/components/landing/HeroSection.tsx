@@ -190,10 +190,10 @@ export function HeroSection({
         )}
 
         {/* ── Risk Profile Inputs ── */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 w-full mt-2 mb-4">
+        <div className="flex flex-col items-stretch gap-3 w-full mt-2 mb-4">
           {/* Budget Input */}
           <div
-            className="flex-1 flex items-center bg-white/60 backdrop-blur-md rounded-full px-4 h-[44px]"
+            className="w-full flex items-center bg-white/60 backdrop-blur-md rounded-full px-4 h-[46px]"
             style={{ border: "1px solid rgba(255,255,255,0.4)", boxShadow: "0 2px 10px rgba(8,47,73,0.05)" }}
           >
             <span className="text-[#64748B] text-sm font-medium mr-2">₹</span>
@@ -210,7 +210,7 @@ export function HeroSection({
 
           {/* Risk Level Selector */}
           <div
-            className="flex-1 flex items-center bg-white/60 backdrop-blur-md rounded-full p-1 h-[44px]"
+            className="w-full flex items-center bg-white/60 backdrop-blur-md rounded-full p-1 h-[46px]"
             style={{ border: "1px solid rgba(255,255,255,0.4)", boxShadow: "0 2px 10px rgba(8,47,73,0.05)" }}
           >
             {["Conservative", "Moderate", "Aggressive"].map((level) => (

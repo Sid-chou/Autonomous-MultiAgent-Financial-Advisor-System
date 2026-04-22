@@ -28,6 +28,17 @@ WARNING_TRANSLATIONS = {
 }
 
 
+THEME_TO_PLAIN_ENGLISH = {
+    "competition":  "competitive pressure from cheaper alternatives",
+    "earnings":     "earnings concerns",
+    "macro":        "broader economic headwinds",
+    "regulatory":   "regulatory risk",
+    "management":   "governance or management concerns",
+    "deal_loss":    "loss of key business contracts",
+    "general":      "negative market sentiment"
+}
+
+
 def _translate_warnings(warnings):
     """Map internal warning strings to plain-English versions."""
     if not warnings:
@@ -68,6 +79,16 @@ def build_prompt(data, flags):
 
     translated_warnings = _translate_warnings(warnings)
 
+    # Build risk factors block from top_factors
+    factors_text = "No specific news risk factors identified."
+    top_factors = sentiment.get("top_factors", [])
+    if top_factors:
+        factor_lines = []
+        for f in top_factors:
+            readable = THEME_TO_PLAIN_ENGLISH.get(f.get("theme", "general"), "negative market sentiment")
+            factor_lines.append(f'- {readable}: "{f["headline"]}"')
+        factors_text = "\n".join(factor_lines)
+
     # Build data quality note
     data_quality = None
     if flags["is_partial"]:
@@ -84,6 +105,9 @@ Explain the following stock analysis for {company} in plain English.
 DECISION: {decision}
 CONFIDENCE: {portfolio.get('confidence', 'N/A')}
 MARKET CONDITIONS: {technical.get('regime_label', 'STABLE')}
+
+NEWS RISK FACTORS DRIVING SENTIMENT:
+{factors_text}
 
 What the analysis found:
 - News and sentiment: {sentiment.get('label', 'N/A')} (confidence: {sentiment.get('confidence', 'N/A')})
@@ -110,6 +134,8 @@ STRICT RULES:
 6. If trade is BLOCKED — explain why in plain language using block_reason
 7. If market conditions are PANIC — mention unusual volatility calmly
 8. If data is partial — mention which data was missing in plain language
+9. If NEWS RISK FACTORS above are present, name the dominant business reason in plain language in your explanation — do not skip this
+10. End your response JSON with this exact disclaimer field: "This is not SEBI-registered investment advice. Please consult a qualified advisor before investing."
 
 Return valid JSON only. No markdown. No preamble.
 
@@ -118,7 +144,8 @@ Return valid JSON only. No markdown. No preamble.
   "explanation": "2 to 3 sentences in plain English",
   "action": "{decision}",
   "risk_note": "one sentence about investment amount or block reason",
-  "warnings": {json.dumps(translated_warnings)}
+  "warnings": {json.dumps(translated_warnings)},
+  "disclaimer": "This is not SEBI-registered investment advice. Please consult a qualified advisor before investing."
 }}
 """
     return prompt, data_quality
@@ -170,6 +197,7 @@ def generate_explanation(data, flags):
             "risk_note":         result.get("risk_note"),
             "data_quality_note": data_quality,
             "warnings":          result.get("warnings", []),
+            "disclaimer":        result.get("disclaimer", "This is not SEBI-registered investment advice. Please consult a qualified advisor before investing."),
             "status":            "OK",
             "error":             None,
         }

@@ -23,6 +23,42 @@ CORS(app)  # Enable CORS for Spring Boot integration
 reddit_collector = RedditCollector()
 
 
+# ─── Risk Theme Classification ────────────────────────────────────────────────
+
+RISK_THEMES = {
+    "competition":  ["competitor", "rival", "cheaper", "alternative", "disruption", "ai replace", "automation", "undercut"],
+    "earnings":     ["miss", "below estimate", "profit warning", "revenue decline", "weak quarter", "disappoints"],
+    "macro":        ["recession", "rate hike", "inflation", "slowdown", "gdp", "fed", "rbi"],
+    "regulatory":   ["sebi", "penalty", "investigation", "compliance", "ban", "probe"],
+    "management":   ["ceo", "resign", "fraud", "layoff", "restructure", "scandal"],
+    "deal_loss":    ["lost contract", "deal cancelled", "client exit", "order cancelled", "pulled out"]
+}
+
+def classify_theme(headline: str) -> str:
+    headline_lower = headline.lower()
+    for theme, keywords in RISK_THEMES.items():
+        if any(kw in headline_lower for kw in keywords):
+            return theme
+    return "general"
+
+
+def extract_top_factors(scored_headlines: list) -> list:
+    """
+    scored_headlines: list of dicts with keys: headline, label, confidence
+    Returns top 3 negative headlines with theme classification.
+    """
+    negative = [h for h in scored_headlines if h["label"] == "negative"]
+    negative.sort(key=lambda x: x["confidence"], reverse=True)
+    return [
+        {
+            "headline":   h["headline"],
+            "theme":      classify_theme(h["headline"]),
+            "confidence": round(h["confidence"], 2)
+        }
+        for h in negative[:3]
+    ]
+
+
 # ─── Concurrent RSS Fetching ─────────────────────────────────────────────────
 
 def fetch_single_feed(source, search_terms):
@@ -169,6 +205,7 @@ def analyze_sentiment():
                 "sentiment_score": None,
                 "confidence":      None,
                 "label":           None,
+                "top_factors":     [],
                 "article_count":   0,
                 "status":          "NULL",
                 "error":           "No articles found for this ticker across all sources"
@@ -180,7 +217,8 @@ def analyze_sentiment():
         # Analyze news sentiments
         news_sentiments = []
         news_sources = []
-        
+        scored_headlines = []
+
         if news_articles:
             print("Analyzing news sentiment...")
             texts = [article['sentiment_text'] for article in news_articles]
@@ -194,6 +232,13 @@ def analyze_sentiment():
                     "sentiment": sentiment['label'].upper(),
                     "score": round(sentiment['sentiment_score'], 3),
                     "url": article.get('url', '')
+                })
+                # Build scored_headlines for top_factors extraction
+                scored_headlines.append({
+                    "headline":   article['title'],
+                    "label":      sentiment['label'].lower(),
+                    "confidence": sentiment['sentiment_score'] if sentiment['label'].lower() == 'negative'
+                                  else sentiment.get('confidence', abs(sentiment['sentiment_score']))
                 })
         
         # Analyze Reddit sentiments
@@ -260,10 +305,11 @@ def analyze_sentiment():
             
         result = {
             "sentiment_score": sentiment_sc,
-            "confidence": round(confidence, 4),
-            "label": final_label,
-            "status": "OK",
-            "error": None
+            "confidence":      round(confidence, 4),
+            "label":           final_label,
+            "top_factors":     extract_top_factors(scored_headlines),
+            "status":          "OK",
+            "error":           None
         }
         
         # Cache the result
@@ -285,10 +331,11 @@ def analyze_sentiment():
         
         return jsonify({
             "sentiment_score": None,
-            "confidence": None,
-            "label": None,
-            "status": "NULL",
-            "error": str(e)
+            "confidence":      None,
+            "label":           None,
+            "top_factors":     [],
+            "status":          "NULL",
+            "error":           str(e)
         }), 200
 
 @app.route('/cache-stats', methods=['GET'])
